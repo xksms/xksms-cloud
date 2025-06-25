@@ -1,0 +1,83 @@
+version: '3.7'
+
+services:
+  # Elasticsearch 服务（主节点）
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node                  # 单节点模式
+      - ELASTIC_PASSWORD=changeme                   # elastic 超级用户密码
+      - xpack.security.enabled=true                 # 启用安全认证
+      - xpack.security.http.ssl.enabled=false       # 不启用 HTTPS（开发环境）
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g                  # 内存设置
+    ports:
+      - "9200:9200"                                  # 暴露本地端口
+    volumes:
+      - esdata:/usr/share/elasticsearch/data         # 本地数据卷
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:changeme http://localhost:9200 >/dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  # 临时容器：为 kibana_system 用户设置密码（否则 Kibana 无法连接）
+  kibana_settings:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.2
+    container_name: kibana_settings
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    command: >
+      bash -c '
+        echo "🛠️ 正在设置 kibana_system 密码...";
+        start_time=$$(date +%s);
+        timeout=60;
+        until curl -s -u elastic:changeme -X POST http://elasticsearch:9200/_security/user/kibana_system/_password \
+          -H "Content-Type: application/json" \
+          -d "{\"password\":\"changeme\"}" | grep -q "^{}"; do
+          if [ $$(($$(date +%s) - $$start_time)) -ge $$timeout ]; then
+            echo "❌ 设置 kibana_system 密码超时";
+            exit 1;
+          fi;
+          sleep 2;
+        done;
+        echo "✅ kibana_system 密码设置成功";
+      '
+
+  # Kibana 服务（管理界面）
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.0.2
+    container_name: kibana
+    depends_on:
+      kibana_settings:
+        condition: service_completed_successfully
+    environment:
+      - SERVER_NAME=kibana
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system         # 使用 kibana_system 账号连接 ES
+      - ELASTICSEARCH_PASSWORD=changeme
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=changemechangemechangemechangeme
+        # 用于保存加密对象（必须是32位字符串）
+    ports:
+      - "5601:5601"
+    volumes:
+      - kibana-data:/usr/share/kibana/data
+
+  # Logstash 日志处理管道（可选）
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.0.2
+    container_name: logstash
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=changeme
+    ports:
+      - "5044:5044"                                   # beats input 端口
+    volumes:
+      - ./pipeline:/usr/share/logstash/pipeline       # 挂载你的 pipeline 配置
+
+volumes:
+  esdata:
+  kibana-data:
