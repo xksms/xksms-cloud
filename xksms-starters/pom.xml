@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.xksms</groupId>
+        <artifactId>xksms-cloud</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>xksms-starters</artifactId>
+    <packaging>pom</packaging>
+    <description>
+        通用 starter 集合
+    </description>
+    <modules>
+        <module>xksms-starter-log</module>
+    </modules>
+
+
+</project>
