@@ -9,46 +9,50 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-starter-log</artifactId>
+    <artifactId>xksms-starter-security</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <description>统一日志规范、TraceId 注入、MDC配置、Logback 格式、日志输出控制
+    <description>
+        提供 JWT 安全认证能力，并且实现日志模块中的 SPI 接口 LogUserProvider
     </description>
 
     <dependencies>
-        <!-- Logback + JSON Encoder -->
-        <dependency>
-            <groupId>net.logstash.logback</groupId>
-            <artifactId>logstash-logback-encoder</artifactId>
-        </dependency>
-
-        <!-- Spring Boot Web（为了注册 Filter） -->
+        <!-- Spring Boot 自动配置支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- Spring Security 核心依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+
+        <!-- JWT 工具类（建议你使用 jjwt 或 Auth0） -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
         </dependency>
+
+
+        <!-- 可选：Lombok 简化实体类 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-starter-log</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
-
 </project>

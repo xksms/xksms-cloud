@@ -65,6 +65,102 @@ Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN�
 ---
 ![ArchitectureDiagram.png](ArchitectureDiagram.png)
 
+#### 项目结构
+
+```
+xksms-cloud
+├── pom.xml                                 # 多模块聚合父项目（继承 Spring Boot 官方父级）
+│
+├── xksms-dependencies                      # ✅ 依赖版本管理 BOM（dependencyManagement + import）
+│
+├── xksms-common                            # 公共工具模块（BeanUtils、枚举、基础对象）
+├── xksms-commons-core                      # 全局响应结构、异常类、错误码、基础枚举等
+├── xksms-commons-security                  # 用户上下文、JWT 工具类、安全注解
+│
+├── xksms-starters                          # 通用 Starter 封装集合
+│   ├── xksms-starter-log                   # MDC、TraceId 日志增强
+│   ├── xksms-starter-elk                   # ELK JSON 格式日志适配（logstash-logback-encoder）
+│   ├── xksms-starter-rpc                   # OpenFeign 封装：拦截器 + fallback + 日志
+│   ├── xksms-starter-webclient             # WebClient 拦截器链 + 超时配置
+│   ├── xksms-starter-error                 # 全局异常处理 + 自定义错误码解析
+│   ├── xksms-starter-security              # JWT 解析 + 用户信息注入 + 权限注解支持
+│   ├── xksms-starter-swagger               # SpringDoc + Knife4j 文档配置
+│   ├── xksms-starter-datasource            # 动态数据源 + 分库分表 + 多租户 + ShardingSphere
+│   ├── xksms-starter-cache                 # Redis + Caffeine 本地二级缓存封装
+│   ├── xksms-starter-job                   # XXL-Job 注册 + 注解支持
+│   ├── xksms-starter-i18n                  # 国际化 MessageSource 封装
+│   ├── xksms-starter-observability         # SkyWalking、Prometheus、Micrometer 集成
+│   ├── xksms-starter-cors                  # 全局 CORS 支持
+│   ├── xksms-starter-idempotent            # 接口幂等性控制（Redis + 注解）
+│   ├── xksms-starter-tenant                # 多租户上下文、租户隔离插件
+│   ├── xksms-starter-seata                 # Seata 客户端封装（数据源代理）
+│   └── xksms-starter-test                  # TestContainer、WireMock 集成测试支持
+│
+├── xksms-config
+│   ├── xksms-config-server                 # 配置中心（Nacos / Spring Cloud Config）
+│   └── xksms-config-repo                   # 配置仓库（nacos 配置 / Git）
+│
+├── xksms-gateway
+│   ├── xksms-gateway-core                  # 基础网关配置、全局异常、鉴权过滤器
+│   └── xksms-gateway-ratelimit             # Sentinel、Redis、Bucket4j 限流策略
+│
+├── xksms-auth
+│   ├── xksms-auth-server                   # OAuth2 授权服务（Spring Authorization Server）
+│   └── xksms-auth-client                   # 鉴权接口，供网关解析 JWT 与获取用户信息
+│
+├── xksms-log-center
+│   └── log-consumer                        # Kafka/Filebeat 日志消费入库模块
+│
+├── xksms-monitor
+│   ├── xksms-monitor-admin                 # Spring Boot Admin 服务监控
+│   ├── xksms-monitor-tracing               # SkyWalking 采集 Agent 服务
+│   └── xksms-monitor-metrics               # Prometheus 指标采集 + Grafana 面板模板
+│
+├── xksms-job
+│   ├── xksms-job-admin                     # XXL-Job 管理控制台
+│   └── xksms-job-client                    # Job 执行器模块（调用 starter-job）
+│
+├── xksms-notify
+│   ├── xksms-notify-core                   # 通知接口定义 + 通道管理
+│   └── xksms-notify-adapter                # 短信、邮箱、钉钉、微信适配器
+│
+├── xksms-file
+│   └── xksms-file-service                  # 文件上传模块（本地、OSS、MinIO 等）
+│
+├── xksms-search
+│   └── xksms-search-service                # Elasticsearch 统一全文检索（商品、日志等）
+│
+├── xksms-tenant
+│   └── xksms-tenant-service                # 多租户服务模块（租户初始化、配置、隔离）
+│
+├── xksms-ai
+│   └── xksms-ai-core                       # AI 能力平台（对接大模型，Prompt 管理等）
+│
+├── xksms-admin
+│   ├── xksms-admin-api                     # 管理后台后端接口聚合层（聚合网关 + 业务 BFF）
+│   └── xksms-admin-ui                      # 管理后台前端（Vue3 + Element Plus）
+│
+├── xksms-docs
+│   └── 架构图、模块设计、接口规范、部署文档等（Markdown / AsciiDoc / PlantUML）
+│
+├── xksms-test
+│   └── 集成测试场景、Contract Test、性能压测用例等
+│
+├── xksms-modules                          # 🧠 各领域核心业务模块（强烈建议 api + biz 分层）
+│   ├── xksms-user
+│   │   ├── xksms-user-api                 # DTO + FeignClient + 通用常量
+│   │   └── xksms-user-biz                 # Controller + Service + Mapper
+│   ├── xksms-order
+│   │   ├── xksms-order-api
+│   │   └── xksms-order-biz
+│   ├── xksms-product
+│   │   ├── xksms-product-api
+│   │   └── xksms-product-biz
+│   ├── xksms-payment
+│   │   ├── xksms-payment-api
+│   │   └── xksms-payment-biz
+│   └── ...
+```
 #####         
 #### 安装教程
 
