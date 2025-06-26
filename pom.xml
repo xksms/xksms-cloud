@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cn.xksms</groupId>
+    <groupId>com.xksms</groupId>
     <artifactId>xksms-cloud</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
@@ -14,65 +14,66 @@
 
         <!-- 公共模块 -->
         <module>xksms-common</module>
-        <module>xksms-commons-core</module>
-        <module>xksms-commons-security</module>
+        <!--        <module>xksms-commons-core</module>-->
+        <!--        <module>xksms-commons-security</module>-->
 
         <!-- Starters -->
+        <module>xksms-starters</module>
         <module>xksms-starters/xksms-starter-log</module>
-        <module>xksms-starters/xksms-starter-elk</module>
-        <module>xksms-starters/xksms-starter-rpc</module>
-        <module>xksms-starters/xksms-starter-webclient</module>
-        <module>xksms-starters/xksms-starter-error</module>
+        <!--        <module>xksms-starters/xksms-starter-elk</module>-->
+        <!--        <module>xksms-starters/xksms-starter-rpc</module>-->
+        <!--        <module>xksms-starters/xksms-starter-webclient</module>-->
+        <!--        <module>xksms-starters/xksms-starter-error</module>-->
         <module>xksms-starters/xksms-starter-security</module>
-        <module>xksms-starters/xksms-starter-swagger</module>
-        <module>xksms-starters/xksms-starter-datasource</module>
-        <module>xksms-starters/xksms-starter-cache</module>
-        <module>xksms-starters/xksms-starter-job</module>
-        <module>xksms-starters/xksms-starter-i18n</module>
-        <module>xksms-starters/xksms-starter-observability</module>
-        <module>xksms-starters/xksms-starter-cors</module>
-        <module>xksms-starters/xksms-starter-idempotent</module>
-        <module>xksms-starters/xksms-starter-tenant</module>
-        <module>xksms-starters/xksms-starter-seata</module>
-        <module>xksms-starters/xksms-starter-test</module>
+        <!--        <module>xksms-starters/xksms-starter-swagger</module>-->
+        <!--        <module>xksms-starters/xksms-starter-datasource</module>-->
+        <!--        <module>xksms-starters/xksms-starter-cache</module>-->
+        <!--        <module>xksms-starters/xksms-starter-job</module>-->
+        <!--        <module>xksms-starters/xksms-starter-i18n</module>-->
+        <!--        <module>xksms-starters/xksms-starter-observability</module>-->
+        <!--        <module>xksms-starters/xksms-starter-cors</module>-->
+        <!--        <module>xksms-starters/xksms-starter-idempotent</module>-->
+        <!--        <module>xksms-starters/xksms-starter-tenant</module>-->
+        <!--        <module>xksms-starters/xksms-starter-seata</module>-->
+        <!--        <module>xksms-starters/xksms-starter-test</module>-->
 
-        <!-- 平台服务 -->
-        <module>xksms-config/xksms-config-server</module>
-        <module>xksms-config/xksms-config-repo</module>
-        <module>xksms-gateway/xksms-gateway-core</module>
-        <module>xksms-gateway/xksms-gateway-ratelimit</module>
-        <module>xksms-auth/xksms-auth-server</module>
-        <module>xksms-auth/xksms-auth-client</module>
-        <module>xksms-log-center/log-consumer</module>
-        <module>xksms-monitor/xksms-monitor-admin</module>
-        <module>xksms-monitor/xksms-monitor-tracing</module>
-        <module>xksms-monitor/xksms-monitor-metrics</module>
-        <module>xksms-job/xksms-job-admin</module>
-        <module>xksms-job/xksms-job-client</module>
-        <module>xksms-notify/xksms-notify-core</module>
-        <module>xksms-notify/xksms-notify-adapter</module>
-        <module>xksms-file/xksms-file-service</module>
-        <module>xksms-search/xksms-search-service</module>
-        <module>xksms-tenant/xksms-tenant-service</module>
-        <module>xksms-ai/xksms-ai-core</module>
+        <!--        &lt;!&ndash; 平台服务 &ndash;&gt;-->
+        <!--        <module>xksms-config/xksms-config-server</module>-->
+        <!--        <module>xksms-config/xksms-config-repo</module>-->
+        <!--        <module>xksms-gateway/xksms-gateway-core</module>-->
+        <!--        <module>xksms-gateway/xksms-gateway-ratelimit</module>-->
+        <!--        <module>xksms-auth/xksms-auth-server</module>-->
+        <!--        <module>xksms-auth/xksms-auth-client</module>-->
+        <!--        <module>xksms-log-center/log-consumer</module>-->
+        <!--        <module>xksms-monitor/xksms-monitor-admin</module>-->
+        <!--        <module>xksms-monitor/xksms-monitor-tracing</module>-->
+        <!--        <module>xksms-monitor/xksms-monitor-metrics</module>-->
+        <!--        <module>xksms-job/xksms-job-admin</module>-->
+        <!--        <module>xksms-job/xksms-job-client</module>-->
+        <!--        <module>xksms-notify/xksms-notify-core</module>-->
+        <!--        <module>xksms-notify/xksms-notify-adapter</module>-->
+        <!--        <module>xksms-file/xksms-file-service</module>-->
+        <!--        <module>xksms-search/xksms-search-service</module>-->
+        <!--        <module>xksms-tenant/xksms-tenant-service</module>-->
+        <!--        <module>xksms-ai/xksms-ai-core</module>-->
 
-        <!-- 后台管理系统 -->
-        <module>xksms-admin/xksms-admin-api</module>
-        <module>xksms-admin/xksms-admin-ui</module>
+        <!--        &lt;!&ndash; 后台管理系统 &ndash;&gt;-->
+        <!--        <module>xksms-admin/xksms-admin-api</module>-->
+        <!--        <module>xksms-admin/xksms-admin-ui</module>-->
 
-        <!-- 文档 / 测试 -->
-        <module>xksms-docs</module>
-        <module>xksms-test</module>
+        <!--        &lt;!&ndash; 文档 / 测试 &ndash;&gt;-->
+        <!--        <module>xksms-docs</module>-->
+        <!--        <module>xksms-test</module>-->
 
-        <!-- 业务模块 -->
-        <module>xksms-modules/xksms-user/xksms-user-api</module>
-        <module>xksms-modules/xksms-user/xksms-user-biz</module>
-        <module>xksms-modules/xksms-order/xksms-order-api</module>
-        <module>xksms-modules/xksms-order/xksms-order-biz</module>
-        <module>xksms-modules/xksms-product/xksms-product-api</module>
-        <module>xksms-modules/xksms-product/xksms-product-biz</module>
-        <module>xksms-modules/xksms-payment/xksms-payment-api</module>
-        <module>xksms-modules/xksms-payment/xksms-payment-biz</module>
+        <!--        &lt;!&ndash; 业务模块 &ndash;&gt;-->
+        <!--        <module>xksms-modules/xksms-user/xksms-user-api</module>-->
+        <!--        <module>xksms-modules/xksms-user/xksms-user-biz</module>-->
+        <!--        <module>xksms-modules/xksms-order/xksms-order-api</module>-->
+        <!--        <module>xksms-modules/xksms-order/xksms-order-biz</module>-->
+        <!--        <module>xksms-modules/xksms-product/xksms-product-api</module>-->
+        <!--        <module>xksms-modules/xksms-product/xksms-product-biz</module>-->
+        <!--        <module>xksms-modules/xksms-payment/xksms-payment-api</module>-->
+        <!--        <module>xksms-modules/xksms-payment/xksms-payment-biz</module>-->
         <module>xksms-dependencies</module>
     </modules>
 
@@ -80,7 +81,8 @@
         <java.version>17</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
-        <revision>1.0.0-SNAPSHOT</revision>
+        <version>1.0.0-SNAPSHOT</version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
@@ -89,7 +91,7 @@
             <dependency>
                 <groupId>com.xksms</groupId>
                 <artifactId>xksms-dependencies</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

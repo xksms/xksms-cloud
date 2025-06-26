@@ -1,6 +1,6 @@
-package cn.xksms.common.enums;
+package com.xksms.common.enums;
 
-import cn.xksms.common.core.IntArrayValuable;
+import com.xksms.common.core.IntArrayValuable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
