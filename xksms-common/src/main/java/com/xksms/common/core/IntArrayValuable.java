@@ -1,4 +1,4 @@
-package cn.xksms.common.core;
+package com.xksms.common.core;
 
 /**
  * 可生成 Int 数组的接口
