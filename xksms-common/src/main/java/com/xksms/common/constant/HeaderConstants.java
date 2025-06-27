@@ -1,4 +1,4 @@
-package cn.xksms.common.constant;
+package com.xksms.common.constant;
 
 public interface HeaderConstants {
     String TRACE_ID = "X-Trace-Id";
