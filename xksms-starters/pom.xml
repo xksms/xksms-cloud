@@ -17,6 +17,8 @@
     <modules>
         <module>xksms-starter-log</module>
         <module>xksms-starter-security</module>
+        <module>xksms-starter-elk</module>
+        <module>xksms-starter-observability</module>
     </modules>
 
 
