@@ -19,12 +19,12 @@
 
         <!-- Starters -->
         <module>xksms-starters</module>
-        <module>xksms-starters/xksms-starter-log</module>
+        <!--        <module>xksms-starters/xksms-starter-log</module>-->
         <!--        <module>xksms-starters/xksms-starter-elk</module>-->
         <!--        <module>xksms-starters/xksms-starter-rpc</module>-->
         <!--        <module>xksms-starters/xksms-starter-webclient</module>-->
         <!--        <module>xksms-starters/xksms-starter-error</module>-->
-        <module>xksms-starters/xksms-starter-security</module>
+        <!--        <module>xksms-starters/xksms-starter-security</module>-->
         <!--        <module>xksms-starters/xksms-starter-swagger</module>-->
         <!--        <module>xksms-starters/xksms-starter-datasource</module>-->
         <!--        <module>xksms-starters/xksms-starter-cache</module>-->
@@ -66,6 +66,7 @@
         <!--        <module>xksms-test</module>-->
 
         <!--        &lt;!&ndash; 业务模块 &ndash;&gt;-->
+        <module>xksms-modules</module>
         <!--        <module>xksms-modules/xksms-user/xksms-user-api</module>-->
         <!--        <module>xksms-modules/xksms-user/xksms-user-biz</module>-->
         <!--        <module>xksms-modules/xksms-order/xksms-order-api</module>-->
@@ -74,14 +75,13 @@
         <!--        <module>xksms-modules/xksms-product/xksms-product-biz</module>-->
         <!--        <module>xksms-modules/xksms-payment/xksms-payment-api</module>-->
         <!--        <module>xksms-modules/xksms-payment/xksms-payment-biz</module>-->
-        <module>xksms-dependencies</module>
     </modules>
 
     <properties>
         <java.version>17</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
-        <version>1.0.0-SNAPSHOT</version>
+        <revision>1.0.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -105,7 +105,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.14.0</version>
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>

@@ -1,0 +1,8 @@
+logstash:
+  host: 192.168.2.10
+  port: 5044
+server:
+  port: 10000
+spring:
+  application:
+    name: xksms-user

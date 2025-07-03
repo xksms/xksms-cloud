@@ -9,17 +9,14 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-common</artifactId>
-    <packaging>jar</packaging>
-    <version>${revision}</version>
+    <artifactId>xksms-modules</artifactId>
     <name>${project.artifactId}</name>
-    <description>提供系统内所有模块可复用的枚举、常量、工具类</description>
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <packaging>pom</packaging>
+    <description>
+        业务模块
+    </description>
+    <modules>
+        <module>xksms-user</module>
+    </modules>
 
 </project>
