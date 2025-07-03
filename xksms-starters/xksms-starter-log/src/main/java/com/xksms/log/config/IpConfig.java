@@ -1,4 +1,4 @@
-package com.xksms.elk.config;
+package com.xksms.log.config;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;

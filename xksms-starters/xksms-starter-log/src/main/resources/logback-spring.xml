@@ -1,31 +1,20 @@
 <configuration>
-
-    <!--    &lt;!&ndash; 引入 Spring Boot 默认的配置 &ndash;&gt;-->
-    <!--    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>-->
-
-    <!-- 配置应用名称（例如：在日志中显示应用的名称） -->
-    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
-
-    <!--    &lt;!&ndash; CONSOLE appender: 输出日志到控制台 &ndash;&gt;-->
-    <!--    <appender name="CONSOLE" class="net.logstash.logback.appender.LoggingEventCompositeJsonEncoder">-->
-    <!--        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
-    <!--            <providers>-->
-    <!--                <timestamp>-->
-    <!--                    <timeZone>Asia/Shanghai</timeZone>-->
-    <!--                </timestamp>-->
-    <!--                <loggerName/>-->
-    <!--                <threadName/>-->
-    <!--                <logLevel/>-->
-    <!--                <message/>-->
-    <!--                <mdc/>-->
-    <!--                <contextName/>-->
-    <!--                <arguments/>-->
-    <!--                <stackTrace/>-->
-    <!--                <globalCustomFields>{"appName":"${APP_NAME}"}</globalCustomFields>-->
-    <!--            </providers>-->
-    <!--        </encoder>-->
-    <!--        <target>System.out</target>-->
-    <!--    </appender>-->
+    <springProperty scope="context" name="logstashHost" source="logstash.host"/>
+    <springProperty scope="context" name="logstashPort" source="logstash.port"/>
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <conversionRule conversionWord="ip" converterClass="com.xksms.log.config.IpConfig"/>
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${logstashHost}:${logstashPort}</destination> <!-- Logstash 地址 -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timestamp/>
+            <loggerName/>
+            <logLevel/>
+            <message/>
+            <mdc/>
+            <contextName/>
+            <globalCustomFields>{"appName":"${appName}"}</globalCustomFields>
+        </encoder>
+    </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -33,11 +22,8 @@
         </encoder>
     </appender>
 
-
-    <!-- 设置根日志级别为 DEBUG -->
-    <root level="DEBUG">
-        <!--        <appender-ref ref="CONSOLE"/>-->
+    <root level="INFO">
+        <appender-ref ref="LOGSTASH"/>
         <appender-ref ref="STDOUT"/>
     </root>
-
 </configuration>
