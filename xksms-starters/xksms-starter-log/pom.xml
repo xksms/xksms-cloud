@@ -17,10 +17,10 @@
 
     <dependencies>
         <!-- Logback + JSON Encoder -->
-        <dependency>
-            <groupId>net.logstash.logback</groupId>
-            <artifactId>logstash-logback-encoder</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>net.logstash.logback</groupId>-->
+        <!--            <artifactId>logstash-logback-encoder</artifactId>-->
+        <!--        </dependency>-->
 
         <!-- Spring Boot Web（为了注册 Filter） -->
         <dependency>

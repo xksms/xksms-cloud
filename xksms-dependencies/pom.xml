@@ -25,12 +25,19 @@
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback-classic.version>1.5.18</logback-classic.version>
+        <logback-core.version>1.5.18</logback-core.version>
         <sentinel.version>1.8.6</sentinel.version>
         <java-jwt.version>4.4.0</java-jwt.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback-core.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.auth0</groupId>
                 <artifactId>java-jwt</artifactId>
