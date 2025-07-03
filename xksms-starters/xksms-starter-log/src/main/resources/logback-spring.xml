@@ -1,0 +1,43 @@
+<configuration>
+
+    <!--    &lt;!&ndash; 引入 Spring Boot 默认的配置 &ndash;&gt;-->
+    <!--    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>-->
+
+    <!-- 配置应用名称（例如：在日志中显示应用的名称） -->
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
+
+    <!--    &lt;!&ndash; CONSOLE appender: 输出日志到控制台 &ndash;&gt;-->
+    <!--    <appender name="CONSOLE" class="net.logstash.logback.appender.LoggingEventCompositeJsonEncoder">-->
+    <!--        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
+    <!--            <providers>-->
+    <!--                <timestamp>-->
+    <!--                    <timeZone>Asia/Shanghai</timeZone>-->
+    <!--                </timestamp>-->
+    <!--                <loggerName/>-->
+    <!--                <threadName/>-->
+    <!--                <logLevel/>-->
+    <!--                <message/>-->
+    <!--                <mdc/>-->
+    <!--                <contextName/>-->
+    <!--                <arguments/>-->
+    <!--                <stackTrace/>-->
+    <!--                <globalCustomFields>{"appName":"${APP_NAME}"}</globalCustomFields>-->
+    <!--            </providers>-->
+    <!--        </encoder>-->
+    <!--        <target>System.out</target>-->
+    <!--    </appender>-->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %ip [%thread] %-5level %X{traceId} %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- 设置根日志级别为 DEBUG -->
+    <root level="DEBUG">
+        <!--        <appender-ref ref="CONSOLE"/>-->
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
