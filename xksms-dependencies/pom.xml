@@ -6,48 +6,42 @@
 
     <groupId>com.xksms</groupId>
     <artifactId>xksms-dependencies</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <version>1.0.0-SNAPSHOT</version>
     <description>xksms-cloud的依赖版本管理</description>
 
     <properties>
-
+        <java.version>17</java.version>
         <spring-boot.version>3.2.12</spring-boot.version>
         <spring.cloud.version>2023.0.4</spring.cloud.version>
         <spring.cloud.alibaba.version>2023.0.3.3</spring.cloud.alibaba.version>
 
-
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+
+        <!-- 第三方组件版本 -->
         <lombok.version>1.18.34</lombok.version>
-        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <slf4j.version>2.0.17</slf4j.version>
-        <logback-classic.version>1.5.18</logback-classic.version>
-        <logback-core.version>1.5.18</logback-core.version>
-        <sentinel.version>1.8.6</sentinel.version>
         <java-jwt.version>4.4.0</java-jwt.version>
+        <sentinel.version>1.8.6</sentinel.version>
+        <apm-agent-core.version>9.4.0</apm-agent-core.version>
+        <apm-toolkit-trace.version>9.4.0</apm-toolkit-trace.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
+
+            <!-- Spring 依赖导入 -->
             <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${logback-core.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>com.auth0</groupId>
-                <artifactId>java-jwt</artifactId>
-                <version>${java-jwt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba.csp</groupId>
-                <artifactId>sentinel-core</artifactId>
-                <version>${sentinel.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -55,33 +49,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-
-            <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-openfeign</artifactId>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback-classic.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.logstash.logback</groupId>
-                <artifactId>logstash-logback-encoder</artifactId>
-                <version>${logstash-logback-encoder.version}</version>
-            </dependency>
-
 
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
@@ -91,29 +58,54 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- 统一依赖管理 -->
+            <!-- SkyWalking -->
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>org.apache.skywalking</groupId>
+                <artifactId>apm-agent-core</artifactId>
+                <version>${apm-agent-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.skywalking</groupId>
+                <artifactId>apm-toolkit-trace</artifactId>
+                <version>${apm-toolkit-trace.version}</version>
             </dependency>
 
-
-            <!-- Spring 核心 -->
+            <!-- Sentinel -->
             <dependency>
-                <!-- 用于生成自定义的 Spring @ConfigurationProperties 配置类的说明文件 -->
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-configuration-processor</artifactId>
-                <version>${spring-boot.version}</version>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-core</artifactId>
+                <version>${sentinel.version}</version>
             </dependency>
 
+            <!-- 日志增强 -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback-encoder.version}</version>
+            </dependency>
+
+            <!-- JWT -->
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>${java-jwt.version}</version>
+            </dependency>
+
+            <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
             </dependency>
+
+            <!-- Spring 配置生成器 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <version>${spring-boot.version}</version>
+                <optional>true</optional>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
