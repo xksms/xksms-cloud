@@ -28,9 +28,4 @@ public class LogAutoConfiguration {
 		return new DefaultLogUserProvider();
 	}
 
-	@Bean
-	public LogbackConfiguration logbackConfiguration() {
-		return new LogbackConfiguration();
-	}
-
 }

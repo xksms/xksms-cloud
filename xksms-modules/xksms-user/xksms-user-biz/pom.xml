@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>com.xksms</groupId>
-            <artifactId>xksms-starter-log</artifactId>
+            <artifactId>xksms-starter-observability</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
