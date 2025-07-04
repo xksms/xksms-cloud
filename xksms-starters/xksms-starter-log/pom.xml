@@ -45,6 +45,13 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-starter-observability</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>

@@ -4,5 +4,8 @@ logstash:
 server:
   port: 10000
 spring:
+  profiles:
+    active: observability
   application:
     name: xksms-user
+

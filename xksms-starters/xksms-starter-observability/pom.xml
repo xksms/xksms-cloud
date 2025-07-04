@@ -44,9 +44,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.xksms</groupId>
-            <artifactId>xksms-starter-log</artifactId>
-            <version>${revision}</version>
+            <groupId>org.apache.skywalking</groupId>
+            <artifactId>apm-agent-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.skywalking</groupId>
+            <artifactId>apm-toolkit-trace</artifactId>
         </dependency>
     </dependencies>
+
+
 </project>
