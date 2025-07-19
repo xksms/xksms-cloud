@@ -1,0 +1,15 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name:unknown}
+      env: ${spring.profiles.active:dev}
