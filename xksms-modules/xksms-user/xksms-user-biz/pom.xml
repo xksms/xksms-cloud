@@ -27,6 +27,11 @@
             <version>${revision}</version>
         </dependency>
         <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-starter-observability</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
