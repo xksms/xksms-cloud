@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  redis:
+    image: redis:8.0.3
+    container_name: redis8
+    command: redis-server --requirepass xksms --appendonly yes
+    ports:
+      - "6379:6379"  # Redis 默认端口
+    volumes:
+      - redis-data:/data
+    restart: always
+    networks:
+      - xksms-net
+
+  redis-insight:
+    image: redis/redisinsight:2.70
+    container_name: redis-insight
+    ports:
+      - "5540:5540"  # RedisInsight 默认 Web UI 端口
+    depends_on:
+      - redis
+    restart: always
+    networks:
+      - xksms-net
+    volumes:
+      - redis-insight-data:/data
+
+volumes:
+  redis-data:
+  redis-insight-data:
+
+networks:
+  xksms-net:
+    external: true  # 使用统一网络
