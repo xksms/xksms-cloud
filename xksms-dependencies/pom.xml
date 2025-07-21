@@ -28,10 +28,18 @@
         <apm-agent-core.version>9.4.0</apm-agent-core.version>
         <apm-toolkit-trace.version>9.4.0</apm-toolkit-trace.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
+        <caffeine.version>3.1.8</caffeine.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- Caffeine 本地缓存 -->
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
 
             <!-- Spring 依赖导入 -->
             <dependency>
