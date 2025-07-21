@@ -6,3 +6,6 @@ server:
 spring:
   application:
     name: xksms-user
+  config:
+    import: optional:classpath:observability-default.yml
+
