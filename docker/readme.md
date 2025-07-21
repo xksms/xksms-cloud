@@ -1,3 +1,4 @@
+```
 xksms-cloud
 ├── docker/                         # ✅ 专用 docker 资源目录
 │   ├── docker-compose.yml          # 默认组合编排（如 ELK + SkyWalking）
@@ -19,7 +20,7 @@ xksms-cloud
 | `skywalking/`        | SkyWalking OAP + UI，Agent 配置说明也可放入           |
 | `prometheus/`        | Prometheus + Grafana 监控系统                    |
 | `docker-compose.yml` | 可以是入口组合部署，也可拆分为每个服务独立控制                      |
-
+```
 # 📦 XKSMS 基础设施 Docker 启动说明
 
 ## 📊 日志平台 ELK
