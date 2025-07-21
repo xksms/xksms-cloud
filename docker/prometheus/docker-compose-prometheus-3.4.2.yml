@@ -8,6 +8,8 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    networks:
+      - xksms-net
     restart: always
 
   grafana:
@@ -20,7 +22,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - xksms-net
     restart: always
-
 volumes:
   grafana-data:

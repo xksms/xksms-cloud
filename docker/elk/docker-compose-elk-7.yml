@@ -7,7 +7,6 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
     ulimits:
       memlock:
         soft: -1
@@ -18,7 +17,7 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
     networks:
-      - sky-elk-net
+      - xksms-net
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.17.26
@@ -31,7 +30,7 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      - sky-elk-net
+      - xksms-net
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.26
@@ -43,12 +42,12 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      - sky-elk-net
+      - xksms-net
 
 volumes:
   esdata:
     driver: local
 
 networks:
-  sky-elk-net:
-    name: sky-elk-net  # ✅ 明确指定网络名，Docker 自动创建/接入
+  xksms-net:
+    name: xksms-net  # ✅ 明确指定网络名，Docker 自动创建/接入
