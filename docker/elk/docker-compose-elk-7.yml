@@ -50,4 +50,4 @@ volumes:
 
 networks:
   xksms-net:
-    name: xksms-net  # ✅ 明确指定网络名，Docker 自动创建/接入
+    external: true
