@@ -18,6 +18,7 @@
         <module>xksms-starter-log</module>
         <module>xksms-starter-security</module>
         <module>xksms-starter-observability</module>
+        <module>xksms-starter-nacos</module>
     </modules>
 
 

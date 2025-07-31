@@ -8,73 +8,16 @@
     <artifactId>xksms-cloud</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
+
     <modules>
         <!-- 依赖版本 BOM -->
         <module>xksms-dependencies</module>
-
         <!-- 公共模块 -->
         <module>xksms-common</module>
-        <!--        <module>xksms-commons-core</module>-->
-        <!--        <module>xksms-commons-security</module>-->
-
         <!-- Starters -->
         <module>xksms-starters</module>
-        <!--        <module>xksms-starters/xksms-starter-log</module>-->
-        <!--        <module>xksms-starters/xksms-starter-elk</module>-->
-        <!--        <module>xksms-starters/xksms-starter-rpc</module>-->
-        <!--        <module>xksms-starters/xksms-starter-webclient</module>-->
-        <!--        <module>xksms-starters/xksms-starter-error</module>-->
-        <!--        <module>xksms-starters/xksms-starter-security</module>-->
-        <!--        <module>xksms-starters/xksms-starter-swagger</module>-->
-        <!--        <module>xksms-starters/xksms-starter-datasource</module>-->
-        <!--        <module>xksms-starters/xksms-starter-cache</module>-->
-        <!--        <module>xksms-starters/xksms-starter-job</module>-->
-        <!--        <module>xksms-starters/xksms-starter-i18n</module>-->
-        <!--        <module>xksms-starters/xksms-starter-observability</module>-->
-        <!--        <module>xksms-starters/xksms-starter-cors</module>-->
-        <!--        <module>xksms-starters/xksms-starter-idempotent</module>-->
-        <!--        <module>xksms-starters/xksms-starter-tenant</module>-->
-        <!--        <module>xksms-starters/xksms-starter-seata</module>-->
-        <!--        <module>xksms-starters/xksms-starter-test</module>-->
-
-        <!--        &lt;!&ndash; 平台服务 &ndash;&gt;-->
-        <!--        <module>xksms-config/xksms-config-server</module>-->
-        <!--        <module>xksms-config/xksms-config-repo</module>-->
-        <!--        <module>xksms-gateway/xksms-gateway-core</module>-->
-        <!--        <module>xksms-gateway/xksms-gateway-ratelimit</module>-->
-        <!--        <module>xksms-auth/xksms-auth-server</module>-->
-        <!--        <module>xksms-auth/xksms-auth-client</module>-->
-        <!--        <module>xksms-log-center/log-consumer</module>-->
-        <!--        <module>xksms-monitor/xksms-monitor-admin</module>-->
-        <!--        <module>xksms-monitor/xksms-monitor-tracing</module>-->
-        <!--        <module>xksms-monitor/xksms-monitor-metrics</module>-->
-        <!--        <module>xksms-job/xksms-job-admin</module>-->
-        <!--        <module>xksms-job/xksms-job-client</module>-->
-        <!--        <module>xksms-notify/xksms-notify-core</module>-->
-        <!--        <module>xksms-notify/xksms-notify-adapter</module>-->
-        <!--        <module>xksms-file/xksms-file-service</module>-->
-        <!--        <module>xksms-search/xksms-search-service</module>-->
-        <!--        <module>xksms-tenant/xksms-tenant-service</module>-->
-        <!--        <module>xksms-ai/xksms-ai-core</module>-->
-
-        <!--        &lt;!&ndash; 后台管理系统 &ndash;&gt;-->
-        <!--        <module>xksms-admin/xksms-admin-api</module>-->
-        <!--        <module>xksms-admin/xksms-admin-ui</module>-->
-
-        <!--        &lt;!&ndash; 文档 / 测试 &ndash;&gt;-->
-        <!--        <module>xksms-docs</module>-->
-        <!--        <module>xksms-test</module>-->
-
-        <!--        &lt;!&ndash; 业务模块 &ndash;&gt;-->
+        <!-- 业务模块 -->
         <module>xksms-modules</module>
-        <!--        <module>xksms-modules/xksms-user/xksms-user-api</module>-->
-        <!--        <module>xksms-modules/xksms-user/xksms-user-biz</module>-->
-        <!--        <module>xksms-modules/xksms-order/xksms-order-api</module>-->
-        <!--        <module>xksms-modules/xksms-order/xksms-order-biz</module>-->
-        <!--        <module>xksms-modules/xksms-product/xksms-product-api</module>-->
-        <!--        <module>xksms-modules/xksms-product/xksms-product-biz</module>-->
-        <!--        <module>xksms-modules/xksms-payment/xksms-payment-api</module>-->
-        <!--        <module>xksms-modules/xksms-payment/xksms-payment-biz</module>-->
     </modules>
 
     <properties>
@@ -85,7 +28,41 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.2.12</spring-boot.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+
+        <!-- 默认环境 -->
+        <spring.profiles.active>dev</spring.profiles.active>
+        <logback.config>logback-dev.xml</logback.config>
     </properties>
+
+    <!-- Maven 环境配置 -->
+    <profiles>
+        <!-- 开发环境 -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+            </properties>
+        </profile>
+
+        <!-- 测试环境 -->
+        <profile>
+            <id>test</id>
+            <properties>
+                <spring.profiles.active>test</spring.profiles.active>
+            </properties>
+        </profile>
+
+        <!-- 生产环境 -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <spring.profiles.active>prod</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
@@ -114,8 +91,13 @@
                                 <artifactId>lombok</artifactId>
                             </exclude>
                         </excludes>
+                        <!-- 传递环境变量到应用 -->
+                        <systemPropertyVariables>
+                            <spring.profiles.active>${spring.profiles.active}</spring.profiles.active>
+                        </systemPropertyVariables>
                     </configuration>
                 </plugin>
+
                 <!-- Maven Compiler Plugin -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -126,6 +108,18 @@
                         <target>${java.version}</target>
                     </configuration>
                 </plugin>
+
+                <!-- Maven Resources Plugin - 支持资源过滤 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <useDefaultDelimiters>true</useDefaultDelimiters>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
@@ -146,5 +140,6 @@
             </plugins>
         </pluginManagement>
     </build>
+
 
 </project>
