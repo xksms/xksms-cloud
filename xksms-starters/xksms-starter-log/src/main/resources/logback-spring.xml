@@ -1,39 +1,73 @@
 <configuration>
-    <springProperty scope="context" name="logstashHost" source="logstash.host"/>
-    <springProperty scope="context" name="logstashPort" source="logstash.port"/>
-    <springProperty scope="context" name="appName" source="spring.application.name"/>
-    <conversionRule conversionWord="ip" converterClass="com.xksms.log.config.IpConfig"/>
-    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>${logstashHost}:${logstashPort}</destination> <!-- Logstash 地址 -->
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <timestamp/>
-            <loggerName/>
-            <logLevel/>
-            <message/>
-            <mdc/>
-            <contextName/>
-            <globalCustomFields>{"appName":"${appName}"}</globalCustomFields>
-        </encoder>
-    </appender>
+    <springProperty scope="context" name="logstashHost" source="logstash.host" defaultValue="localhost"/>
+    <springProperty scope="context" name="logstashPort" source="logstash.port" defaultValue="4560"/>
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="xksms-app"/>
 
+    <!-- 公共转换规则 -->
+    <conversionRule conversionWord="ip" converterClass="com.xksms.log.config.IpConfig"/>
+    <conversionRule conversionWord="tid" converterClass="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternConverter"/>
+
+    <!-- 控制台输出（开发使用） -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %ip [%thread] %-5level %X{traceId} %logger{50} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="LOGSTASH"/>
-        <appender-ref ref="STDOUT"/>
-    </root>
+    <!-- Logstash 输出（生产使用） -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${logstashHost}:${logstashPort}</destination>
+        <keepAliveDuration>5 minutes</keepAliveDuration>
+        <reconnectionDelay>3 seconds</reconnectionDelay>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timestamp/>
+            <loggerName/>
+            <logLevel/>
+            <threadName/>
+            <message/>
+            <mdc/>
+            <contextName/>
+            <stackTrace/>
+            <globalCustomFields>{"appName":"${appName}"}</globalCustomFields>
+        </encoder>
+    </appender>
 
+    <!-- 开发环境日志配置 -->
+    <springProfile name="dev">
+        <root level="DEBUG">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.apache.ibatis" level="DEBUG"/>
 
-    <!-- SkyWalking 通过 JavaAgent 插件注入 traceId/spanId -->
-    <conversionRule conversionWord="tid"
-                    converterClass="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternConverter"/>
+        <logger name="com.alibaba.nacos" level="INFO"/>
+        <logger name="com.alibaba.cloud.nacos" level="INFO"/>
+    </springProfile>
 
+    <!-- 测试环境日志配置 -->
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.apache.ibatis" level="INFO"/>
 
-    <!-- 降低 Spring 噪声 -->
-    <logger name="org.springframework" level="WARN"/>
-    <logger name="org.apache.ibatis" level="WARN"/>
+        <logger name="com.alibaba.nacos" level="INFO"/>
+        <logger name="com.alibaba.cloud.nacos" level="INFO"/>
+    </springProfile>
+
+    <!-- 生产环境日志配置 -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.apache.ibatis" level="WARN"/>
+
+        <logger name="com.alibaba.nacos" level="WARN"/>
+        <logger name="com.alibaba.cloud.nacos" level="WARN"/>
+    </springProfile>
+
 </configuration>

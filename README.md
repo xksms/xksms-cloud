@@ -75,6 +75,7 @@ xksms-cloud
 ├── xksms-starters                          # 通用 Starter 封装集合
 │   ├── xksms-starter-log                   # MDC、TraceId 日志增强 ELK JSON 格式日志适配（logstash-logback-encoder）
 │   ├── xksms-starter-rpc                   # OpenFeign 封装：拦截器 + fallback + 日志
+│   ├── xksms-starter-nacos                 # 统一封装所有注册中心相关配置，减少重复配置，增强可维护性。
 │   ├── xksms-starter-webclient             # WebClient 拦截器链 + 超时配置
 │   ├── xksms-starter-error                 # 全局异常处理 + 自定义错误码解析
 │   ├── xksms-starter-security              # JWT 解析 + 用户信息注入 + 权限注解支持
