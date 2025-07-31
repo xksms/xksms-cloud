@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: xksms-user
+  profiles:
+    active: @spring.profiles.active@
+  config:
+    import:
+      - optional:classpath:observability-default.yml
+
+# 根据环境选择不同的 logback 配置
+logging:
+  config: classpath:logback-spring.xml
+
+# 通用配置（所有环境共享）
+server:
+  servlet:
+    context-path: /
+  shutdown: graceful
+  port: 10000
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+# 环境特定配置（通过 Maven Profile 注入）
+
+
+logstash:
+  host: 192.168.2.10
+  port: 5044
+xksms:
+  nacos:
+    server-addr: 192.168.2.10:8848
+    namespace: 56c8a55c-34c0-4ad5-8621-73c960de4a53
+    group: DEFAULT_GROUP
+    username: nacos
+    password: xksmsxksms

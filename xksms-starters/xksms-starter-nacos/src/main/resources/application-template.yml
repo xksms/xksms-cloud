@@ -1,0 +1,45 @@
+# ===================================================================
+# XK-SMS 微服务标准配置模板 (application.yml)
+# ===================================================================
+
+# Spring Boot 应用核心配置
+spring:
+  application:
+    # 【必须修改】全局唯一的服务名，例如：xksms-user-service
+    name: ${SERVICE_NAME}
+  profiles:
+    # 【必须修改】激活的环境，例如：dev, test, prod
+    active: ${PROFILE:dev}
+  # 声明从 Nacos 加载配置。这是 Spring Boot 2.4+ 的标准做法。
+  # 具体的 Nacos 连接信息由下面的 xksms.nacos 配置块提供。
+  config:
+    import: "nacos:"
+
+# ===================================================================
+# XK-SMS 统一平台配置体系
+# ===================================================================
+xksms:
+  nacos:
+    # -- Nacos 连接信息 --
+    # 【必须配置】Nacos 服务器地址，通过环境变量 ${NACOS_ADDR} 注入
+    server-addr: "${NACOS_ADDR:localhost:8848}"
+    # 【必须配置】Nacos 命名空间，用于环境隔离，通过 ${NACOS_NAMESPACE} 注入
+    namespace: "${NACOS_NAMESPACE:public}"
+    # Nacos 分组，建议统一管理，通过 ${NACOS_GROUP} 注入
+    group: "${NACOS_GROUP:DEFAULT_GROUP}"
+
+    # -- 配置中心 --
+    config-enabled: true
+    file-extension: "yaml"
+
+    # -- 共享配置 (类型安全，IDE有提示) --
+    # 由 Starter 自动加载，这里只是示例，实际可以在 Nacos 中配置
+    shared-configs:
+      - data-id: xksms-common.yaml      # 共享通用配置
+      - data-id: datasource-mysql.yaml  # 共享数据库配置
+      - data-id: cache-redis.yaml       # 共享Redis配置
+
+    # -- 服务发现 --
+    enabled: true
+    metadata:
+      version: "@project.version@" # 自动获取 Maven 项目版本

@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s  # 默认采集周期
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'xksms-metrics'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:10000'   # 示例：xksms-user 服务端口
+          - 'host.docker.internal:10001'   # 示例：xksms-auth 服务端口
+        labels:
+          env: dev
+          region: huabei-1
