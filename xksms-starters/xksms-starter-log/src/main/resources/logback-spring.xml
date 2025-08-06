@@ -1,7 +1,7 @@
 <configuration>
     <springProperty scope="context" name="logstashHost" source="logstash.host" defaultValue="localhost"/>
     <springProperty scope="context" name="logstashPort" source="logstash.port" defaultValue="4560"/>
-    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="xksms-app"/>
+    <contextName>${spring.application.name:-xksms-app}</contextName>
 
     <!-- 公共转换规则 -->
     <conversionRule conversionWord="ip" converterClass="com.xksms.log.config.IpConfig"/>
@@ -9,8 +9,36 @@
 
     <!-- 控制台输出（开发使用） -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %ip [%thread] %-5level %X{traceId} %logger{50} - %msg%n</pattern>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+            <timestamp>
+                <fieldName>timestamp</fieldName>
+                <timeZone>UTC</timeZone>
+            </timestamp>
+            <contextName>
+                <fieldName>app_name</fieldName>
+            </contextName>
+            <logLevel>
+                <fieldName>level</fieldName>
+            </logLevel>
+            <mdc>
+                <includeMdcKeyName>tid</includeMdcKeyName>
+            </mdc>
+            <pattern>
+                <omitEmptyFields>true</omitEmptyFields>
+                <pattern>{"ip": "%ip"}</pattern>
+            </pattern>
+            <threadName>
+                <fieldName>thread</fieldName>
+            </threadName>
+            <loggerName>
+                <fieldName>logger</fieldName>
+            </loggerName>
+            <message/>
+            <stackTrace>
+                <fieldName>stack_trace</fieldName>
+            </stackTrace>
+
         </encoder>
     </appender>
 
@@ -20,17 +48,41 @@
         <keepAliveDuration>5 minutes</keepAliveDuration>
         <reconnectionDelay>3 seconds</reconnectionDelay>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <timestamp/>
-            <loggerName/>
-            <logLevel/>
-            <threadName/>
+            <timestamp>
+                <fieldName>timestamp</fieldName>
+                <timeZone>UTC</timeZone>
+            </timestamp>
+            <contextName>
+                <fieldName>app_name</fieldName>
+            </contextName>
+            <logLevel>
+                <fieldName>level</fieldName>
+            </logLevel>
+            <mdc>
+                <includeMdcKeyName>tid</includeMdcKeyName>
+            </mdc>
+            <pattern>
+                <omitEmptyFields>true</omitEmptyFields>
+                <pattern>{"ip": "%ip"}</pattern>
+            </pattern>
+            <threadName>
+                <fieldName>thread</fieldName>
+            </threadName>
+            <loggerName>
+                <fieldName>logger</fieldName>
+            </loggerName>
             <message/>
-            <mdc/>
-            <contextName/>
-            <stackTrace/>
-            <globalCustomFields>{"appName":"${appName}"}</globalCustomFields>
+            <stackTrace>
+                <fieldName>stack_trace</fieldName>
+            </stackTrace>
+
         </encoder>
     </appender>
+
+    <!--    <root level="INFO">-->
+    <!--        <appender-ref ref="STDOUT"/>-->
+    <!--    </root>-->
+
 
     <!-- 开发环境日志配置 -->
     <springProfile name="dev">
@@ -38,11 +90,18 @@
             <appender-ref ref="STDOUT"/>
             <appender-ref ref="LOGSTASH"/>
         </root>
+        <logger name="com.xksms" level="DEBUG"/>
+
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.apache.ibatis" level="DEBUG"/>
 
         <logger name="com.alibaba.nacos" level="INFO"/>
         <logger name="com.alibaba.cloud.nacos" level="INFO"/>
+
+        <logger name="io.netty" level="INFO"/>
+        <logger name="reactor.netty" level="INFO"/>
+
+        <logger name="org.springframework.cloud.gateway" level="DEBUG"/>
     </springProfile>
 
     <!-- 测试环境日志配置 -->
@@ -51,11 +110,15 @@
             <appender-ref ref="STDOUT"/>
             <appender-ref ref="LOGSTASH"/>
         </root>
+        <logger name="com.xksms" level="INFO"/>
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.apache.ibatis" level="INFO"/>
 
         <logger name="com.alibaba.nacos" level="INFO"/>
         <logger name="com.alibaba.cloud.nacos" level="INFO"/>
+
+        <logger name="io.netty" level="INFO"/>
+        <logger name="reactor.netty" level="INFO"/>
     </springProfile>
 
     <!-- 生产环境日志配置 -->
@@ -63,11 +126,16 @@
         <root level="INFO">
             <appender-ref ref="LOGSTASH"/>
         </root>
+
+        <logger name="com.xksms" level="INFO"/>
         <logger name="org.springframework" level="WARN"/>
         <logger name="org.apache.ibatis" level="WARN"/>
 
         <logger name="com.alibaba.nacos" level="WARN"/>
         <logger name="com.alibaba.cloud.nacos" level="WARN"/>
+
+        <logger name="io.netty" level="WARN"/>
+        <logger name="reactor.netty" level="WARN"/>
     </springProfile>
 
 </configuration>

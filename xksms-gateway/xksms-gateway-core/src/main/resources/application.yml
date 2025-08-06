@@ -1,0 +1,85 @@
+# ===================================================================
+# 默认通用配置 (所有环境生效)
+# ===================================================================
+server:
+  port: 9999
+spring:
+  application:
+    name: xksms-gateway
+
+  # 关键部分：定义Profile的默认行为
+  profiles:
+    # 指定一个默认的 profile。
+    # 当外部没有通过任何方式(环境变量、JVM参数)指定激活的profile时，此默认值生效。
+    # 这是一种安全机制，确保在本地直接运行时，总能以可预期的开发模式启动。
+    default: dev
+
+  # 默认导入 nacos 配置和日志配置
+  config:
+    import:
+      - optional:classpath:observability-default.yml
+
+  cloud:
+    gateway:
+      # 显式定义所有环境共享的路由规则
+      routes:
+        - id: xksms-auth-route
+          uri: lb://xksms-auth
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+
+        - id: xksms-user-route
+          uri: lb://xksms-user
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=2
+
+# 引入我们自己的 Nacos Starter 配置
+xksms:
+  nacos:
+    server-addr: 192.168.2.10:8848
+    namespace: 56c8a55c-34c0-4ad5-8621-73c960de4a53
+    username: nacos
+    password: xksmsxksms
+
+# 日志配置
+logging:
+  config: classpath:logback-spring.xml
+logstash:
+  host: 192.168.2.10
+  port: 5044
+
+debug: true
+---
+# ===================================================================
+# 开发环境的差异化配置 (当 profile = dev 时激活)
+# ===================================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+  cloud:
+    gateway:
+      # 在开发环境下，为了方便，我们依然开启服务自动发现路由
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+---
+# ===================================================================
+# 测试与生产环境的差异化配置 (当 profile = test 或 prod 时激活)
+# ===================================================================
+spring:
+  config:
+    activate:
+      on-profile: test | prod
+  cloud:
+    gateway:
+      # 在测试和生产环境，必须关闭自动发现，只使用上面定义的显式路由
+      discovery:
+        locator:
+          enabled: false
