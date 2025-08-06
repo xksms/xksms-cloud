@@ -18,6 +18,7 @@
         <module>xksms-starters</module>
         <!-- 业务模块 -->
         <module>xksms-modules</module>
+        <module>xksms-gateway</module>
     </modules>
 
     <properties>
