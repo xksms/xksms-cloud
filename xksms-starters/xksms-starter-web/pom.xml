@@ -45,23 +45,6 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>com.xksms</groupId>
-            <artifactId>xksms-common</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.xksms</groupId>
-            <artifactId>xksms-starter-log</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.xksms</groupId>
-            <artifactId>xksms-starter-webflux</artifactId>
-            <version>${revision}</version>
-        </dependency>
 
 
         <dependency>
