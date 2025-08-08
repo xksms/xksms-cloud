@@ -1,1 +1,3 @@
 com.xksms.observability.config.ObservabilityPrometheusAutoConfig
+com.xksms.observability.config.MdcContextAutoConfiguration
+

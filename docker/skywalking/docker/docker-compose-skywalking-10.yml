@@ -9,6 +9,12 @@ services:
       - SW_HEALTH_CHECKER=default
       - SW_HEALTH_CHECKER_INTERVAL_SECONDS=5
       - SW_TELEMETRY=prometheus
+      # 激活 OTel 接收器
+      - SW_OTEL_RECEIVER=default
+
+      # 明确开启 OTLP Traces 和 Metrics 的处理通道
+      # 这确保了我们的链路数据一定会被接收和处理
+      - SW_OTEL_RECEIVER_ENABLED_HANDLERS=otlp-traces,otlp-metrics
     ports:
       - "11800:11800"
       - "12800:12800"

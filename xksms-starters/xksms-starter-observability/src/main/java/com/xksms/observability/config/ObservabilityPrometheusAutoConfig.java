@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
-@EnableConfigurationProperties(ObservabilityProperties.class)
+@EnableConfigurationProperties({ObservabilityProperties.class})
 public class ObservabilityPrometheusAutoConfig {
 
 	@Bean

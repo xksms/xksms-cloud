@@ -22,7 +22,8 @@
                 <fieldName>level</fieldName>
             </logLevel>
             <mdc>
-                <includeMdcKeyName>tid</includeMdcKeyName>
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>spanId</includeMdcKeyName>
             </mdc>
             <pattern>
                 <omitEmptyFields>true</omitEmptyFields>
@@ -59,7 +60,8 @@
                 <fieldName>level</fieldName>
             </logLevel>
             <mdc>
-                <includeMdcKeyName>tid</includeMdcKeyName>
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>spanId</includeMdcKeyName>
             </mdc>
             <pattern>
                 <omitEmptyFields>true</omitEmptyFields>

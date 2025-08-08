@@ -14,17 +14,9 @@
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <description>
-        统一封装如下监控指标与链路追踪接入：
-
-        SkyWalking agent 自动上报；
-
-        Micrometer + Prometheus 指标暴露；
-
-        Prometheus + Grafana 配套 dashboards；
-
-        支持 actuator 暴露健康、info、metrics 等指标接口；
-
-        集成 Spring Boot Admin 可选支持。
+        统一封装可观测性能力：
+        1. Micrometer + Prometheus 指标监控.
+        2. Micrometer + OpenTelemetry (OTLP gRPC) 标准化链路追踪.
     </description>
 
     <dependencies>
@@ -54,20 +46,19 @@
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
 
-
         <dependency>
-            <groupId>org.apache.skywalking</groupId>
-            <artifactId>apm-agent-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.skywalking</groupId>
-            <artifactId>apm-toolkit-trace</artifactId>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.skywalking</groupId>
-            <artifactId>apm-toolkit-webflux</artifactId>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
 
         <dependency>

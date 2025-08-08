@@ -37,8 +37,14 @@ spring:
           filters:
             - StripPrefix=2
 
-# 引入我们自己的 Nacos Starter 配置
+# 引入我们自己的 Starter 配置
 xksms:
+  observability:
+    tracing:
+      # [可选] SkyWalking OAP 地址，如果不配，会使用 starter 中提供的默认值 (localhost:11800)
+      endpoint: grpc://192.168.2.10:11800
+      # [可选] 采样率，默认是 1.0 (100%)
+      sampling-probability: 1.0
   nacos:
     server-addr: 192.168.2.10:8848
     namespace: 56c8a55c-34c0-4ad5-8621-73c960de4a53
