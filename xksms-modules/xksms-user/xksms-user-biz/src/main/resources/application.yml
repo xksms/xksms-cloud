@@ -27,6 +27,14 @@ management:
   endpoint:
     health:
       show-details: never
+  otlp:
+    tracing:
+      transport: grpc
+      endpoint: http://192.168.2.10:4317
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
 
 # 环境特定配置（通过 Maven Profile 注入）
 
@@ -34,6 +42,7 @@ management:
 logstash:
   host: 192.168.2.10
   port: 5044
+
 xksms:
   nacos:
     server-addr: 192.168.2.10:8848
