@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class LogbackConfiguration {
+public class XksmsLogbackConfiguration {
 
 
 	@Bean

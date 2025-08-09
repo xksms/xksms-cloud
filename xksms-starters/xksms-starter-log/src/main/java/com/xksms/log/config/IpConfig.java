@@ -23,14 +23,14 @@ public class IpConfig extends ClassicConverter {
 			Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
 
 			while (allNetInterfaces.hasMoreElements()) {
-				NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+				NetworkInterface netInterface = allNetInterfaces.nextElement();
 				Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
 				while (addresses.hasMoreElements()) {
-					InetAddress ipTmp = (InetAddress) addresses.nextElement();
-					if (ipTmp != null && ipTmp instanceof Inet4Address
+					InetAddress ipTmp = addresses.nextElement();
+					if (ipTmp instanceof Inet4Address
 							&& ipTmp.isSiteLocalAddress()
 							&& !ipTmp.isLoopbackAddress()
-							&& ipTmp.getHostAddress().indexOf(":") == -1) {
+							&& !ipTmp.getHostAddress().contains(":")) {
 						addr = ipTmp;
 					}
 				}

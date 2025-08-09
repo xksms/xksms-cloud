@@ -9,20 +9,15 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-starters</artifactId>
+    <artifactId>xksms-gateway</artifactId>
+    <name>${project.artifactId}</name>
+    <modules>
+        <module>xksms-gateway-core</module>
+    </modules>
     <packaging>pom</packaging>
     <description>
-        通用 starter 集合
+        网关模块
     </description>
-    <modules>
-        <module>xksms-starter-log</module>
-        <module>xksms-starter-security</module>
-        <module>xksms-starter-observability</module>
-        <module>xksms-starter-nacos</module>
-        <module>xksms-starter-web</module>
-        <module>xksms-starter-trace-reactor</module>
-        <module>xksms-starter-webflux</module>
-    </modules>
 
 
 </project>
