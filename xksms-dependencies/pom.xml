@@ -9,17 +9,21 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>xksms-cloud的依赖版本管理</description>
+    <description>xksms-cloud 的依赖版本管理（JDK 21 / Boot 3.5.4 / Cloud 2025.0.0）</description>
 
     <properties>
-        <java.version>17</java.version>
-        <spring-boot.version>3.2.12</spring-boot.version>
-        <spring.cloud.version>2023.0.4</spring.cloud.version>
+        <java.version>21</java.version>
+
+        <!-- 平台对齐 -->
+        <spring-boot.version>3.5.4</spring-boot.version>
+        <spring.cloud.version>2025.0.0</spring.cloud.version>
         <spring.cloud.alibaba.version>2023.0.3.3</spring.cloud.alibaba.version>
 
-        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <!-- 插件版本 -->
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+
 
         <!-- 第三方组件版本 -->
         <lombok.version>1.18.34</lombok.version>
@@ -29,8 +33,7 @@
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <caffeine.version>3.1.8</caffeine.version>
         <micrometer.version>1.14.5</micrometer.version>
-        <opentelemetry-bom.version>1.35.0</opentelemetry-bom.version>
-        <opentelemetry-exporter-otlp-http.version>1.14.0</opentelemetry-exporter-otlp-http.version>
+
     </properties>
 
     <dependencyManagement>
@@ -43,19 +46,7 @@
                 <type>pom</type>
             </dependency>
 
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-bom</artifactId>
-                <version>${opentelemetry-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-otlp-http-trace</artifactId>
-                <version>${opentelemetry-exporter-otlp-http.version}</version>
-            </dependency>
 
 
             <!-- Caffeine 本地缓存 -->

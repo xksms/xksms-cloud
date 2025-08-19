@@ -29,7 +29,7 @@ management:
       show-details: never
   otlp:
     tracing:
-      transport: grpc
+      transport: http
       endpoint: http://192.168.2.10:4317
   tracing:
     enabled: true

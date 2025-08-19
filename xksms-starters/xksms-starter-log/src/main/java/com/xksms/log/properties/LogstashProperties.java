@@ -17,4 +17,9 @@ public class LogstashProperties {
 	 * Logstash 服务器端口
 	 */
 	private int port = 4560;
+
+	/**
+	 * 【新增】本地开发时，供Filebeat采集的日志文件输出路径 (绝对路径)
+	 */
+	private String filePath;
 }
