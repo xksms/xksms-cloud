@@ -1,0 +1,15 @@
+filebeat.inputs:
+  - type: filestream
+    enabled: true
+    paths:
+      - D:/code/*/logs/*/app-json.log
+      # 未压缩滚动时可加：
+      # - D:/code/*/logs/*/app-json.*.log
+
+
+output.logstash:
+  hosts: [ "192.168.2.10:5044" ]
+  ssl.enabled: false
+
+setup.ilm.enabled: false
+logging.level: info

@@ -1,143 +1,195 @@
 <configuration>
+    <!-- 在控制台输出 Logback 自身的状态，便于排错 -->
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    <!-- Spring 属性/变量 -->
     <springProperty scope="context" name="logstashHost" source="logstash.host" defaultValue="localhost"/>
+    <!-- 建议：Beats 占用 5044 时，Logstash TCP 直连请改用 5000（此处仅默认值，实际以应用配置为准） -->
     <springProperty scope="context" name="logstashPort" source="logstash.port" defaultValue="4560"/>
-    <contextName>${spring.application.name:-xksms-app}</contextName>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="xksms-app"/>
+    <property name="LOG_DIR" value="${LOG_DIR:-./logs}"/>
+    <property name="APP_LOG_DIR" value="${LOG_DIR}/${APP_NAME}"/>
 
-    <!-- 公共转换规则 -->
-    <conversionRule conversionWord="ip" converterClass="com.xksms.log.config.IpConfig"/>
-    <conversionRule conversionWord="tid" converterClass="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternConverter"/>
+    <!-- 转换器（Logback 1.5+ 用 class 属性） -->
+    <conversionRule conversionWord="ip" class="com.xksms.log.config.IpConfig"/>
+    <conversionRule conversionWord="tid" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternConverter"/>
 
-    <!-- 控制台输出（开发使用） -->
+
+    <!-- 控制台（JSON） -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <!-- 控制台美化换行，便于肉眼查看 -->
             <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
-            <timestamp>
-                <fieldName>timestamp</fieldName>
-                <timeZone>UTC</timeZone>
-            </timestamp>
-            <contextName>
-                <fieldName>app_name</fieldName>
-            </contextName>
-            <logLevel>
-                <fieldName>level</fieldName>
-            </logLevel>
-            <mdc>
-                <includeMdcKeyName>traceId</includeMdcKeyName>
-                <includeMdcKeyName>spanId</includeMdcKeyName>
-            </mdc>
-            <pattern>
-                <omitEmptyFields>true</omitEmptyFields>
-                <pattern>{"ip": "%ip"}</pattern>
-            </pattern>
-            <threadName>
-                <fieldName>thread</fieldName>
-            </threadName>
-            <loggerName>
-                <fieldName>logger</fieldName>
-            </loggerName>
-            <message/>
-            <stackTrace>
-                <fieldName>stack_trace</fieldName>
-            </stackTrace>
-
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>GMT</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>{"app_name":"${APP_NAME}"}</pattern>
+                </pattern>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <mdc>
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>spanId</includeMdcKeyName>
+                </mdc>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>{"ip":"%ip"}</pattern>
+                </pattern>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message/>
+                <stackTrace>
+                    <fieldName>stack_trace</fieldName>
+                </stackTrace>
+            </providers>
         </encoder>
     </appender>
 
-    <!-- Logstash 输出（生产使用） -->
+
+    <!-- 直连 Logstash（TCP JSON） -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${logstashHost}:${logstashPort}</destination>
         <keepAliveDuration>5 minutes</keepAliveDuration>
         <reconnectionDelay>3 seconds</reconnectionDelay>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <timestamp>
-                <fieldName>timestamp</fieldName>
-                <timeZone>UTC</timeZone>
-            </timestamp>
-            <contextName>
-                <fieldName>app_name</fieldName>
-            </contextName>
-            <logLevel>
-                <fieldName>level</fieldName>
-            </logLevel>
-            <mdc>
-                <includeMdcKeyName>traceId</includeMdcKeyName>
-                <includeMdcKeyName>spanId</includeMdcKeyName>
-            </mdc>
-            <pattern>
-                <omitEmptyFields>true</omitEmptyFields>
-                <pattern>{"ip": "%ip"}</pattern>
-            </pattern>
-            <threadName>
-                <fieldName>thread</fieldName>
-            </threadName>
-            <loggerName>
-                <fieldName>logger</fieldName>
-            </loggerName>
-            <message/>
-            <stackTrace>
-                <fieldName>stack_trace</fieldName>
-            </stackTrace>
-
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>GMT</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>{"app_name":"${APP_NAME}"}</pattern>
+                </pattern>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <mdc>
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>spanId</includeMdcKeyName>
+                </mdc>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>{"ip":"%ip"}</pattern>
+                </pattern>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message/>
+                <stackTrace>
+                    <fieldName>stack_trace</fieldName>
+                </stackTrace>
+            </providers>
         </encoder>
     </appender>
 
-    <!--    <root level="INFO">-->
-    <!--        <appender-ref ref="STDOUT"/>-->
-    <!--    </root>-->
 
+    <!-- 供 Filebeat 采集的 JSON 滚动文件 -->
+    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_DIR}/app-json.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_DIR}/app-json.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>14</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>GMT</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>{"app_name":"${APP_NAME}"}</pattern>
+                </pattern>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <mdc>
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>spanId</includeMdcKeyName>
+                </mdc>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>{"ip":"%ip"}</pattern>
+                </pattern>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message/>
+                <stackTrace>
+                    <fieldName>stack_trace</fieldName>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
 
-    <!-- 开发环境日志配置 -->
+    <!-- 兜底 root（务必放在所有 <springProfile> 之前，仅为消除预解析 WARN，不影响实际环境配置） -->
+    <root level="OFF">
+        <appender-ref ref="STDOUT"/>
+        <!-- <appender-ref ref="LOGSTASH"/> -->
+        <appender-ref ref="FILE_JSON"/>
+    </root>
+
+    <!-- 开发环境 -->
     <springProfile name="dev">
         <root level="DEBUG">
             <appender-ref ref="STDOUT"/>
-            <appender-ref ref="LOGSTASH"/>
+            <!-- <appender-ref ref="LOGSTASH"/> -->   <!-- 可选：保留直连 Logstash -->
+            <appender-ref ref="FILE_JSON"/>  <!-- 供 Filebeat 采集 -->
         </root>
         <logger name="com.xksms" level="DEBUG"/>
-
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.apache.ibatis" level="DEBUG"/>
-
         <logger name="com.alibaba.nacos" level="INFO"/>
         <logger name="com.alibaba.cloud.nacos" level="INFO"/>
-
         <logger name="io.netty" level="INFO"/>
         <logger name="reactor.netty" level="INFO"/>
-
         <logger name="org.springframework.cloud.gateway" level="DEBUG"/>
     </springProfile>
 
-    <!-- 测试环境日志配置 -->
+    <!-- 测试环境 -->
     <springProfile name="test">
         <root level="INFO">
             <appender-ref ref="STDOUT"/>
-            <appender-ref ref="LOGSTASH"/>
+            <!-- <appender-ref ref="LOGSTASH"/> -->
+            <appender-ref ref="FILE_JSON"/>
         </root>
         <logger name="com.xksms" level="INFO"/>
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.apache.ibatis" level="INFO"/>
-
         <logger name="com.alibaba.nacos" level="INFO"/>
         <logger name="com.alibaba.cloud.nacos" level="INFO"/>
-
         <logger name="io.netty" level="INFO"/>
         <logger name="reactor.netty" level="INFO"/>
     </springProfile>
 
-    <!-- 生产环境日志配置 -->
+    <!-- 生产环境 -->
     <springProfile name="prod">
         <root level="INFO">
-            <appender-ref ref="LOGSTASH"/>
+            <!-- 生产默认不打控制台；按需开启 -->
+            <!-- <appender-ref ref="LOGSTASH"/> -->
+            <appender-ref ref="FILE_JSON"/>
         </root>
-
         <logger name="com.xksms" level="INFO"/>
         <logger name="org.springframework" level="WARN"/>
         <logger name="org.apache.ibatis" level="WARN"/>
-
         <logger name="com.alibaba.nacos" level="WARN"/>
         <logger name="com.alibaba.cloud.nacos" level="WARN"/>
-
         <logger name="io.netty" level="WARN"/>
         <logger name="reactor.netty" level="WARN"/>
     </springProfile>
-
 </configuration>
