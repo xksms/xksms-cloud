@@ -9,38 +9,30 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-starter-web</artifactId>
+    <artifactId>xksms-starter-redis</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <description>
-        xksms-cloud Web 领域 Starter，提供统一的Web请求日志、全局异常处理、统一响应封装等Web治理能力。
+        统一封装 Redis 客户端能力:
+        1. 自动配置 RedisTemplate，提供统一的序列化方案 (String-Key, JSON-Value).
+        2. 为分布式锁、限流等非缓存场景提供基础 Redis 操作支持.
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-
-
-
-
 
 
         <dependency>
@@ -48,11 +40,6 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-        </dependency>
-
 
     </dependencies>
 

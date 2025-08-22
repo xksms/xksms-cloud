@@ -18,6 +18,7 @@ spring:
   config:
     import:
       - optional:classpath:observability-default.yml
+      - optional:classpath:redis-default.yml
 
   cloud:
     gateway:
@@ -48,19 +49,13 @@ management:
   otlp:
     tracing:
       transport: http
-      endpoint: http://192.168.2.10:4317
+      endpoint: http://192.168.2.10:4318/v1/traces
   tracing:
     enabled: true
     sampling:
       probability: 1.0
 # 引入我们自己的 Starter 配置
 xksms:
-  observability:
-    tracing:
-      # [可选] SkyWalking OAP 地址，如果不配，会使用 starter 中提供的默认值 (localhost:11800)
-      endpoint: grpc://192.168.2.10:11800
-      # [可选] 采样率，默认是 1.0 (100%)
-      sampling-probability: 1.0
   nacos:
     server-addr: 192.168.2.10:8848
     namespace: 56c8a55c-34c0-4ad5-8621-73c960de4a53

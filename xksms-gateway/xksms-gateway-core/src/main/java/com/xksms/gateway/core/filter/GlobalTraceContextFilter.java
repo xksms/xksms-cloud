@@ -1,71 +1,60 @@
 package com.xksms.gateway.core.filter;
 
-import com.xksms.common.constant.LogConstant;
-import com.xksms.gateway.core.util.TraceHeaderUtil;
-import org.apache.skywalking.apm.toolkit.trace.TraceContext;
-import org.slf4j.MDC;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Signal;
-import reactor.util.context.ContextView;
 
-import java.util.Objects;
-import java.util.function.Consumer;
-
+/**
+ * [重构后]
+ * 一个纯粹的、基于 Micrometer Observation 的全局链路追踪过滤器。
+ *
+ * 它的唯一职责是为每个进入网关的请求创建一个 Observation Scope，
+ * 将链路上下文的生命周期管理完全委托给 Micrometer 框架。
+ *
+ * 它不再关心 TraceId 的具体生成、解析或传递方式，实现了与具体追踪系统（如SkyWalking）的解耦。
+ * MDC 的注入将由 xksms-starter-observability 中的 MdcInjectingObservationHandler 统一负责。
+ */
 @Component
 public class GlobalTraceContextFilter implements GlobalFilter, Ordered {
 
-	// 定义我们要在 Reactor Context 和 MDC 中使用的 KEY
-	private static final String TRACE_ID_KEY = "tid";
-	private static final String IP_KEY = "ip";
+	private final ObservationRegistry registry;
+
+	public GlobalTraceContextFilter(ObservationRegistry registry) {
+		this.registry = registry;
+	}
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-		// 1. 在链路起点，捕获所有需要的上下文信息
-		// 此时 TraceContext.traceId() 已可用，我们优先使用它，以保证与Agent的上下文一致
-		String traceId = TraceContext.traceId();
-		// 如果 Agent 因某种原因在 Filter 执行时还未准备好，我们依然从 Header 解析作为备用
-		String ipAddress = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
-		String spanId = TraceHeaderUtil.generateSpanId();
-		String traceParentHeader = TraceHeaderUtil.buildTraceParentHeader(traceId, spanId);
-		ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-				.header(LogConstant.TRACE_PARENT_HEADER, traceParentHeader)
-				.header(LogConstant.REQUEST_ID_HEADER, traceId)
-				.build();
-		ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
+		// 1. 从交换上下文中提取关键信息，用于创建 Observation
+		// Spring Cloud Gateway 自动创建的 Observation 默认名为 "http server observation"
+		// 我们可以通过 ObservationConvention 来定制其 name 和 tags
+		final String path = exchange.getRequest().getPath().value();
+		final String method = exchange.getRequest().getMethod().name();
 
-		return chain.filter(modifiedExchange)
-				.contextWrite(ctx -> ctx.put(TRACE_ID_KEY, traceId).put(IP_KEY, ipAddress))
-				// 【优化】doOnEach 现在能处理所有情况
-				.doOnEach(logOnEach())
-				// 【优化】空的 doOnError 已不再需要，可以移除
-				.doFinally(signalType -> MDC.clear());
-	}
+		// 2. 创建并启动 Observation
+		// 这是核心：我们只“声明”一个观测点，具体的 TraceId 生成、传播等
+		// 都由 Micrometer 的后端（Tracer）自动完成。
+		Observation observation = Observation.createNotStarted("gateway.http.requests", this.registry)
+				.contextualName("http " + method.toLowerCase() + " " + path)
+				.lowCardinalityKeyValue("http.method", method)
+				.lowCardinalityKeyValue("http.route", path); // 路由匹配后可以换成更精确的 routeId
 
-	/**
-	 * 辅助方法，用于创建 Signal 消费者，将 Reactor Context 的值桥接到 MDC。
-	 * 【已优化】现在可以同时处理成功（onNext）和失败（onError）信号。
-	 */
-	private <T> Consumer<Signal<T>> logOnEach() {
-		return signal -> {
-			// 【关键修正】当信号是 onNext 或 onError 时，都进行 MDC 注入
-			if (signal.isOnNext() || signal.isOnError()) {
-				ContextView context = signal.getContextView();
-				if (!context.isEmpty()) {
-					context.<String>getOrEmpty(TRACE_ID_KEY).ifPresent(tid -> MDC.put(TRACE_ID_KEY, tid));
-					context.<String>getOrEmpty(IP_KEY).ifPresent(ip -> MDC.put(IP_KEY, ip));
-				}
-			}
-		};
+		return chain.filter(exchange)
+				// 3. 将 Observation 的作用域（Scope）绑定到整个响应式流中
+				// ObservationThreadLocalAccessor.KEY 会确保 TraceId 等信息
+				// 在 Reactor 的 Context 中自动传递。
+				.transform(mono -> mono.contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, observation.start())));
 	}
 
 	@Override
 	public int getOrder() {
+		// 确保在所有业务 Filter 之前执行
 		return Ordered.HIGHEST_PRECEDENCE;
 	}
 }
