@@ -1,0 +1,25 @@
+# [可导入] XK-SMS Cache 默认配置文件 (cache-default.yml)
+# 业务模块可通过 spring.config.import 导入此文件以获得推荐的缓存配置。
+#
+# 架构主张：默认启用 L1(Caffeine) + L2(Redis) 的高性能两级缓存模式。
+
+xksms:
+  cache:
+    # 默认启用 starter
+    enabled: true
+
+    # 默认同时开启 L1 和 L2
+    l1-enabled: true
+    l2-enabled: true
+
+    # L1 Caffeine 的默认配置
+    # 这些值与 XksmsCacheProperties Record 中定义的默认值保持一致
+    caffeine:
+      initial-capacity: 128
+      maximum-size: 1024
+
+    # TTL (Time-To-Live) 配置
+    # 我们不在这里提供具体的 TTL，因为这是业务相关的。
+    # 我们鼓励开发者在自己的 application.yml 中定义，例如：
+    # xksms.cache.ttl.users: 10m
+    ttl: { }

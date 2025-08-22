@@ -6,6 +6,8 @@ spring:
   config:
     import:
       - optional:classpath:observability-default.yml
+      - optional:classpath:redis-default.yml
+      - optional:classpath:cache-default.yml
 
 # 根据环境选择不同的 logback 配置
 logging:
@@ -30,7 +32,7 @@ management:
   otlp:
     tracing:
       transport: http
-      endpoint: http://192.168.2.10:4317
+      endpoint: http://192.168.2.10:4318/v1/traces
   tracing:
     enabled: true
     sampling:

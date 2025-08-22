@@ -1,0 +1,17 @@
+# [可导入] XK-SMS Redis 默认配置文件 (redis-default.yml)
+# 业务模块可通过 spring.config.import 导入此文件以获得基础配置
+xksms:
+  redis:
+    # 默认连接本地 Redis，便于本地开发
+    host: 192.168.2.10
+    port: 6379
+    password: xksms
+    database: 0
+    timeout: 5000
+    # 默认启用 Lettuce 连接池，并使用推荐的默认值
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1
