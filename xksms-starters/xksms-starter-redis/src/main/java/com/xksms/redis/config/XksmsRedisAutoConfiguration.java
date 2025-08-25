@@ -4,27 +4,32 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.xksms.redis.RedisHelper;
 import com.xksms.redis.health.RedisConnectionVerifier;
 import com.xksms.redis.properties.XksmsRedisProperties;
+import io.lettuce.core.api.StatefulConnection;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.lang.NonNull;
 
-// [最终方案]
-@AutoConfiguration
+import java.time.Duration;
+
+// 我们不再使用 BeanPostProcessor，而是自己完整地定义核心 Bean
+@AutoConfiguration(before = RedisAutoConfiguration.class)
 @EnableConfigurationProperties(XksmsRedisProperties.class)
 @ConditionalOnProperty(prefix = "xksms.redis", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class XksmsRedisAutoConfiguration {
@@ -32,39 +37,35 @@ public class XksmsRedisAutoConfiguration {
 	private static final Logger log = LoggerFactory.getLogger(XksmsRedisAutoConfiguration.class);
 
 	/**
-	 * Bean 后置处理器，用于将我们自定义的 xksms.redis.* 配置“桥接”到 Spring Boot 原生的 RedisProperties。
-	 * 这是实现“轻量级”定制的核心。
+	 * [核心] 我们亲自创建并注册 LettuceConnectionFactory 这个核心 Bean。
+	 * 因为 Spring Boot 的 RedisAutoConfiguration 中有 @ConditionalOnMissingBean(RedisConnectionFactory.class)，
+	 * 我们的这个 Bean 一旦被注册，Spring Boot 的整个自动配置就会优雅地“让路”，从而从根本上避免了任何冲突。
 	 */
 	@Bean
-	public static BeanPostProcessor xksmsRedisPropertiesProcessor(XksmsRedisProperties xksmsRedisProperties) {
-		log.info("[xksms-starter-redis] 正在应用自定义 Redis 配置...");
-		return new BeanPostProcessor() {
-			@Override
-			public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
-				// 我们只关心 Spring Boot 官方的 RedisProperties 这个 Bean
-				if (bean instanceof RedisProperties nativeProperties) {
-					// 从 xksms 配置中读取值
-					nativeProperties.setHost(xksmsRedisProperties.getHost());
-					nativeProperties.setPort(xksmsRedisProperties.getPort());
-					nativeProperties.setPassword(xksmsRedisProperties.getPassword());
-					nativeProperties.setDatabase(xksmsRedisProperties.getDatabase());
-					nativeProperties.setTimeout(java.time.Duration.ofMillis(xksmsRedisProperties.getTimeout()));
+	@ConditionalOnMissingBean(RedisConnectionFactory.class)
+	public LettuceConnectionFactory redisConnectionFactory(XksmsRedisProperties properties) {
+		log.info("[xksms-starter-redis] 正在创建自定义的 LettuceConnectionFactory...");
+		RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
+		standaloneConfig.setHostName(properties.getHost());
+		standaloneConfig.setPort(properties.getPort());
+		standaloneConfig.setDatabase(properties.getDatabase());
+		if (properties.getPassword() != null && !properties.getPassword().isEmpty()) {
+			standaloneConfig.setPassword(properties.getPassword());
+		}
 
-					// 配置连接池
-					RedisProperties.Lettuce lettuce = nativeProperties.getLettuce();
-					if (lettuce != null) {
-						XksmsRedisProperties.Pool poolProps = xksmsRedisProperties.getLettuce().getPool();
-						lettuce.getPool().setMaxActive(poolProps.getMaxActive());
-						lettuce.getPool().setMaxIdle(poolProps.getMaxIdle());
-						lettuce.getPool().setMinIdle(poolProps.getMinIdle());
-						lettuce.getPool().setMaxWait(java.time.Duration.ofMillis(poolProps.getMaxWait()));
-					}
-					log.info("[xksms-starter-redis] 自定义 Redis 配置已成功应用至 Spring Boot 原生配置。目标地址: {}:{}",
-							nativeProperties.getHost(), nativeProperties.getPort());
-				}
-				return bean;
-			}
-		};
+		XksmsRedisProperties.Pool poolProps = properties.getLettuce().getPool();
+		GenericObjectPoolConfig<StatefulConnection<?, ?>> poolConfig = new GenericObjectPoolConfig<>();
+		poolConfig.setMaxTotal(poolProps.getMaxActive());
+		poolConfig.setMaxIdle(poolProps.getMaxIdle());
+		poolConfig.setMinIdle(poolProps.getMinIdle());
+		poolConfig.setMaxWait(Duration.ofMillis(poolProps.getMaxWait()));
+
+		LettucePoolingClientConfiguration clientConfig = LettucePoolingClientConfiguration.builder()
+				.commandTimeout(Duration.ofMillis(properties.getTimeout()))
+				.poolConfig(poolConfig)
+				.build();
+
+		return new LettuceConnectionFactory(standaloneConfig, clientConfig);
 	}
 
 	/**
@@ -91,7 +92,10 @@ public class XksmsRedisAutoConfiguration {
 	 * 它不再关心序列化器是如何被创建的，只关心如何使用它。
 	 */
 	@Bean
-	public RedisTemplate<String, Object> redisTemplate(
+	// [核心引导] 我们不再将这个 Bean 命名为 "redisTemplate"。
+	// 我们给它一个更底层的、暗示“不建议直接使用”的名字。
+	@ConditionalOnMissingBean(name = "xksmsCoreRedisTemplate")
+	public RedisTemplate<String, Object> xksmsCoreRedisTemplate(
 			RedisConnectionFactory redisConnectionFactory,
 			RedisSerializer<Object> redisValueSerializer // <-- 直接注入
 	) {
@@ -123,5 +127,12 @@ public class XksmsRedisAutoConfiguration {
 	public RedisConnectionVerifier redisConnectionVerifier(RedisConnectionFactory factory, XksmsRedisProperties properties) {
 		// 使用 Record 来创建实例
 		return new RedisConnectionVerifier(factory, properties);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(RedisHelper.class)
+	public RedisHelper redisHelper(RedisTemplate<String, Object> redisTemplate) {
+		log.info("[xksms-starter-redis] 正在创建健壮的 RedisHelper Bean...");
+		return new RedisHelper(redisTemplate);
 	}
 }
