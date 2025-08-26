@@ -31,12 +31,14 @@ management:
       show-details: never
   otlp:
     tracing:
-      transport: http
-      endpoint: http://192.168.2.10:4318/v1/traces
+      transport: grpc
+      endpoint: http://192.168.2.10:11800   # 不需要加 /v1/traces
+      compression: none
   tracing:
     enabled: true
     sampling:
       probability: 1.0
+
 
 # 环境特定配置（通过 Maven Profile 注入）
 
