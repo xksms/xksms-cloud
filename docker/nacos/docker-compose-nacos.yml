@@ -4,6 +4,7 @@ services:
     container_name: nacos
     environment:
       - MODE=standalone
+      - NACOS_SERVER_IP=192.168.2.10
       - NACOS_AUTH_IDENTITY_KEY=serverIdentity
       - NACOS_AUTH_IDENTITY_VALUE=security
       - NACOS_AUTH_TOKEN=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=

@@ -15,6 +15,10 @@ services:
       # 明确开启 OTLP Traces 和 Metrics 的处理通道
       # 这确保了我们的链路数据一定会被接收和处理
       - SW_OTEL_RECEIVER_ENABLED_HANDLERS=otlp-traces,otlp-metrics
+      # ✅ 必须：启用 Zipkin 模块（OTLP traces 依赖它）
+      - SW_RECEIVER_ZIPKIN=default
+      - SW_QUERY_ZIPKIN=default
+
     ports:
       - "11800:11800"
       - "12800:12800"
