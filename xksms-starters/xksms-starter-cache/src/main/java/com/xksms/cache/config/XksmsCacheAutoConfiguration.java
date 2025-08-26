@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,8 @@ import java.util.Map;
 @AutoConfiguration
 @EnableConfigurationProperties(XksmsCacheProperties.class)
 @ConditionalOnProperty(prefix = "xksms.cache", name = "enabled", havingValue = "true", matchIfMissing = true)
+// 当这个自动配置类生效时，它就等同于在应用的启动类上添加了 @EnableCaching。
+@EnableCaching
 public class XksmsCacheAutoConfiguration {
 
 	// ... cacheManager Bean 和 switch 表达式保持不变 ...
