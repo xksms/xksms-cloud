@@ -38,8 +38,17 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
-
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-starter-rpc</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
 
 

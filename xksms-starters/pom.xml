@@ -23,6 +23,7 @@
         <module>xksms-starter-webflux</module>
         <module>xksms-starter-redis</module>
         <module>xksms-starter-cache</module>
+        <module>xksms-starter-rpc</module>
     </modules>
 
 
