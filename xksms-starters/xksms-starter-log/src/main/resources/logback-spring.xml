@@ -146,7 +146,7 @@
 
     <!-- 开发环境 -->
     <springProfile name="dev">
-        <root level="DEBUG">
+        <root level="INFO">
             <appender-ref ref="STDOUT"/>
             <!-- <appender-ref ref="LOGSTASH"/> -->   <!-- 可选：保留直连 Logstash -->
             <appender-ref ref="FILE_JSON"/>  <!-- 供 Filebeat 采集 -->
