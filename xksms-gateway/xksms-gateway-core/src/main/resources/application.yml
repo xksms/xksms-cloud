@@ -19,6 +19,7 @@ spring:
     import:
       - optional:classpath:observability-default.yml
       - optional:classpath:redis-default.yml
+      - optional:classpath:cache-default.yml
 
   cloud:
     gateway:
@@ -37,23 +38,7 @@ spring:
             - Path=/api/user/**
           filters:
             - StripPrefix=2
-# 管理端点配置
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
-  endpoint:
-    health:
-      show-details: never
-  otlp:
-    tracing:
-      transport: http
-      endpoint: http://192.168.2.10:4318/v1/traces
-  tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
+
 # 引入我们自己的 Starter 配置
 xksms:
   nacos:

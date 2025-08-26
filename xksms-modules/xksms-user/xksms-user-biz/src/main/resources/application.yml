@@ -20,24 +20,26 @@ server:
   shutdown: graceful
   port: 10000
 
-# 管理端点配置
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
-  endpoint:
-    health:
-      show-details: never
-  otlp:
-    tracing:
-      transport: grpc
-      endpoint: http://192.168.2.10:11800   # 不需要加 /v1/traces
-      compression: none
-  tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
+## 管理端点配置
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health,info,prometheus
+#  endpoint:
+#    health:
+#      show-details: never
+#  otlp:
+#    tracing:
+#      transport: grpc
+#      endpoint: http://192.168.2.10:11800   # 不需要加 /v1/traces
+#      compression: none
+#  tracing:
+#    enabled: true
+#    sampling:
+#      probability: 1.0
+#    # 兼容多种头，避免你看到的 B3 null 提示 & 保证贯通
+#    propagation.type: [ w3c, b3, b3_multi ]
 
 
 # 环境特定配置（通过 Maven Profile 注入）

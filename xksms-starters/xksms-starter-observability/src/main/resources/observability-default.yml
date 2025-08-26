@@ -13,3 +13,14 @@ management:
     tags:
       application: ${spring.application.name:unknown}
       env: ${spring.profiles.active:dev}
+  otlp:
+    tracing:
+      transport: grpc
+      endpoint: http://192.168.2.10:11800   # 不需要加 /v1/traces
+      compression: none
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    # 兼容多种头，避免你看到的 B3 null 提示 & 保证贯通
+    propagation.type: [ w3c, b3, b3_multi ]
