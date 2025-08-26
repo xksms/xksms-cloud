@@ -22,6 +22,7 @@ services:
     ports:
       - "11800:11800"
       - "12800:12800"
+      - "9412:9412"     # （可选）Zipkin Query API
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:12800/healthcheck" ]
       interval: 10s
@@ -35,6 +36,7 @@ services:
     container_name: skywalking-ui
     environment:
       - SW_OAP_ADDRESS=http://skywalking-oap:12800
+      - SW_ZIPKIN_ADDRESS=http://skywalking-oap:9412
     ports:
       - "18080:8080"
     depends_on:
