@@ -28,6 +28,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
     </dependencies>
 
 

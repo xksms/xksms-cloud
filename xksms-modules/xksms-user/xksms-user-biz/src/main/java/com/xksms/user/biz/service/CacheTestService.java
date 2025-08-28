@@ -1,4 +1,4 @@
-package com.xksms.user.service;
+package com.xksms.user.biz.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;

@@ -30,6 +30,19 @@ public class BaseException extends RuntimeException {
 	}
 
 	/**
+	 * [核心新增]
+	 * 允许在抛出异常时，覆盖错误码的默认消息。
+	 *
+	 * @param errorCode 错误码
+	 * @param message   自定义的、更具体的错误消息
+	 */
+	public BaseException(IErrorCode errorCode, String message) {
+		// 构造函数2：使用传入的自定义消息
+		super(message);
+		this.errorCode = errorCode;
+	}
+
+	/**
 	 * 允许在抛出基础异常时，包装一个底层的原始异常。
 	 * 这对于保留完整的异常堆栈信息、便于问题排查至关重要。
 	 *
