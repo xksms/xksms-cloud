@@ -32,6 +32,8 @@ spring:
           filters:
             - StripPrefix=1
 
+
+
         - id: xksms-user-route
           uri: lb://xksms-user
           predicates:
@@ -39,6 +41,15 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: xksms-notify-route
+          # [核心] lb:// 协议前缀告诉网关，去Nacos中寻找名为 xksms-notify 的服务
+          uri: lb://xksms-notify
+          predicates:
+            # 当请求路径匹配 /notify/** 时，应用此规则
+            - Path=/api/notify/**
+          filters:
+            # 去掉路径前缀 /notify，保证转发到后端服务时，不携带网关的上下文路径
+            - StripPrefix=2
 # 引入我们自己的 Starter 配置
 xksms:
   nacos:

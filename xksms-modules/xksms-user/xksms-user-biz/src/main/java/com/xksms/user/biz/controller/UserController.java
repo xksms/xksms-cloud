@@ -1,4 +1,4 @@
-package com.xksms.user.controller;
+package com.xksms.user.biz.controller;
 
 import com.xksms.common.core.BaseException;
 import com.xksms.common.enums.GlobalErrorCodeEnum;

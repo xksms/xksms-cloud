@@ -1,0 +1,37 @@
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: xksms-notify
+  profiles:
+    active: @spring.profiles.active@
+  config:
+    import:
+      - optional:classpath:observability-default.yml
+      - optional:classpath:redis-default.yml
+      - optional:classpath:cache-default.yml
+
+# 根据环境选择不同的 logback 配置
+logging:
+  config: classpath:logback-spring.xml
+
+# 通用配置（所有环境共享）
+server:
+  shutdown: graceful
+  port: 11000
+
+
+
+
+logstash:
+  host: 192.168.2.10
+  port: 5044
+
+xksms:
+  nacos:
+    server-addr: 192.168.2.10:8848
+    namespace: 56c8a55c-34c0-4ad5-8621-73c960de4a53
+    group: DEFAULT_GROUP
+    username: nacos
+    password: xksmsxksms
+debug: true

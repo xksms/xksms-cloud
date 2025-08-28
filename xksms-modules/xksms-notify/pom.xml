@@ -5,19 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.xksms</groupId>
-        <artifactId>xksms-cloud</artifactId>
+        <artifactId>xksms-modules</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-modules</artifactId>
-    <name>${project.artifactId}</name>
+    <artifactId>xksms-notify</artifactId>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <description>
-        业务模块
+        统一实时消息通知服务
     </description>
+
     <modules>
-        <module>xksms-user</module>
-        <module>xksms-notify</module>
+        <module>xksms-notify-biz</module>
+        <module>xksms-notify-api</module>
     </modules>
 
 </project>

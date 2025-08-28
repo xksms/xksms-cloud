@@ -1,6 +1,6 @@
-package com.xksms.user.controller; // 假设你的 controller 包在这个位置
+package com.xksms.user.biz.controller; // 假设你的 controller 包在这个位置
 
-import com.xksms.user.service.CacheTestService;
+import com.xksms.user.biz.service.CacheTestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

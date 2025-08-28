@@ -5,19 +5,23 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.xksms</groupId>
-        <artifactId>xksms-cloud</artifactId>
+        <artifactId>xksms-notify</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-modules</artifactId>
+    <artifactId>xksms-notify-api</artifactId>
+    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <packaging>pom</packaging>
     <description>
-        业务模块
+        通知服务 API 模块，定义 DTOs 和 Feign 客户端接口。
     </description>
-    <modules>
-        <module>xksms-user</module>
-        <module>xksms-notify</module>
-    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 </project>
