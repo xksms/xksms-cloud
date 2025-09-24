@@ -9,15 +9,16 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-modules</artifactId>
-    <name>${project.artifactId}</name>
+    <artifactId>xksms-platform</artifactId>
     <packaging>pom</packaging>
-    <description>
-        业务模块
-    </description>
-    <modules>
+    <version>${revision}</version>
+    <name>${project.artifactId}</name>
+    <description>平台层: 存放所有基础核心服务</description>
 
-    <module>xksms-notify</module>
+    <modules>
+        <module>xksms-user</module>
+        <module>xksms-system</module>
+        <!--        <module>xksms-notify</module>-->
     </modules>
 
 </project>

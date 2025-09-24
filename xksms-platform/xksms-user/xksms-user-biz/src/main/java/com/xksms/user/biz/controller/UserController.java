@@ -40,4 +40,16 @@ public class UserController {
 		private Long id;
 		private String username;
 	}
+
+//	/**
+//	 * [内部接口] 根据用户名查询用户认证信息。
+//	 * 仅供 xksms-auth 服务远程调用，不应暴露给外部。
+//	 *
+//	 * @param username 用户名
+//	 * @return UserAuthDTO
+//	 */
+//	@GetMapping("/internal/details/{username}")
+//	public UserAuthDTO getUserDetailsForAuth(@PathVariable("username") String username) {
+//		return userService.findUserForAuth(username);
+//	}
 }

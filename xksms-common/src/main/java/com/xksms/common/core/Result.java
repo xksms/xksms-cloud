@@ -1,7 +1,6 @@
 package com.xksms.common.core;
 
 import com.xksms.common.enums.GlobalErrorCodeEnum;
-import lombok.Getter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,34 +12,19 @@ import java.io.Serializable;
  * 它通过泛型 <T> 支持承载任何类型的业务数据。
  *
  * @param <T> 响应体中包含的业务数据类型
+ * @param code
+响应码
+ * @param message
+响应消息
+ * @param data
+响应数据
  */
-@Getter
-public class Result<T> implements Serializable {
+public record Result<T>(int code, String message, T data) implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 响应码
-	 */
-	private final int code;
-
-	/**
-	 * 响应消息
-	 */
-	private final String message;
-
-	/**
-	 * 响应数据
-	 */
-	private final T data;
-
 	// 私有构造函数，强制通过静态工厂方法创建实例
-	private Result(int code, String message, T data) {
-		this.code = code;
-		this.message = message;
-		this.data = data;
-	}
 
 	// --- 静态工厂方法 ---
 

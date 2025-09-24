@@ -5,19 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.xksms</groupId>
-        <artifactId>xksms-cloud</artifactId>
+        <artifactId>xksms-platform</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>xksms-modules</artifactId>
-    <name>${project.artifactId}</name>
+    <artifactId>xksms-system</artifactId>
     <packaging>pom</packaging>
-    <description>
-        业务模块
-    </description>
+    <version>${revision}</version>
+    <name>${project.artifactId}</name>
+    <description>系统管理中心父模块 (租户、角色、权限)</description>
+
     <modules>
-
-    <module>xksms-notify</module>
+        <module>xksms-system-api</module>
+        <module>xksms-system-biz</module>
     </modules>
-
 </project>
