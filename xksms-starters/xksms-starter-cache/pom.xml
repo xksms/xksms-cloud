@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.xksms</groupId>
+        <artifactId>xksms-starters</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>xksms-starter-cache</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>
+        统一封装缓存能力:
+        1. 提供 Spring Cache 抽象的标准化配置.
+        2. 支持 Redis (L2) 和 Caffeine (L1) 两级缓存体系.
+        3. 封装缓存预热、同步、统计等高级功能.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-starter-redis</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>

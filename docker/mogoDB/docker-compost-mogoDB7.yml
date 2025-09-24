@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # MongoDB 服务
+  mongodb:
+    image: mongo:7.0                    # 使用 MongoDB 7.0 官方镜像
+    container_name: xksms-mongodb       # 容器名称，便于网络内引用
+    restart: always                     # 容器异常退出自动重启
+    ports:
+      - 27017:27017                     # 暴露本地端口，便于本地连接（如 Robo 3T）
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root     # 初始化管理员账号
+      MONGO_INITDB_ROOT_PASSWORD: root123  # 管理员密码
+      MONGO_INITDB_DATABASE: xksms         # 默认初始化的数据库
+    volumes:
+      - ./data:/data/db               # 数据持久化挂载目录
+      - ./log:/var/log/mongodb        # MongoDB 日志文件挂载目录
+      - ./init:/docker-entrypoint-initdb.d # 初始化脚本目录（可选，执行 .js/.sh 文件）
+    networks:
+      - xksms-net                  # 加入 SkyWalking / ELK 网络，可与其他服务通信
+
+  # Mongo Express 可视化 Web 管理界面（方便开发调试）
+  mongo-express:
+    image: mongo-express:latest         # 最新版本的 mongo-express
+    container_name: xksms-mongo-express
+    restart: always
+    ports:
+      - 8081:8081                       # 暴露端口供浏览器访问 Web UI
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root    # 连接 MongoDB 的管理员用户名
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root123 # 管理员密码
+      ME_CONFIG_MONGODB_SERVER: mongodb        # MongoDB 容器名（即服务名），自动解析为 IP
+      ME_CONFIG_BASICAUTH_USERNAME: admin      # 访问 mongo-express 的登录用户名
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123   # 登录密码
+    networks:
+      - xksms-net                    # 加入同一网络，使能连接 MongoDB
+
+# 使用已存在的外部网络（必须事先由 ELK 或 SkyWalking 创建）
+networks:
+  sky-elk-net:
+    external: true                      # 表示此网络在其他 compose 文件中已经定义

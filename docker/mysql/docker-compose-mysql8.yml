@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:8.0.42
+    container_name: mysql8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=xksmsxksms
+      - MYSQL_DATABASE=xksms
+      - MYSQL_USER=xksms
+      - MYSQL_PASSWORD=xksms
+      - TZ=Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d/
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      - xksms-net
+
+volumes:
+  mysql-data:
+
+networks:
+  xksms-net:
+    name: xksms-net
+    external: true  # 使用已存在的网络，假设由ELK先创建

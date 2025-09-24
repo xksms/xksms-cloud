@@ -1,0 +1,50 @@
+version: '3.7'
+
+services:
+  skywalking-oap:
+    image: apache/skywalking-oap-server:10.2.0-java17
+    environment:
+      - SW_STORAGE=elasticsearch
+      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
+      - SW_HEALTH_CHECKER=default
+      - SW_HEALTH_CHECKER_INTERVAL_SECONDS=5
+      - SW_TELEMETRY=prometheus
+      # 激活 OTel 接收器
+      - SW_OTEL_RECEIVER=default
+
+      # 明确开启 OTLP Traces 和 Metrics 的处理通道
+      # 这确保了我们的链路数据一定会被接收和处理
+      - SW_OTEL_RECEIVER_ENABLED_HANDLERS=otlp-traces,otlp-metrics
+      # ✅ 必须：启用 Zipkin 模块（OTLP traces 依赖它）
+      - SW_RECEIVER_ZIPKIN=default
+      - SW_QUERY_ZIPKIN=default
+
+    ports:
+      - "11800:11800"
+      - "12800:12800"
+      - "9412:9412"     # （可选）Zipkin Query API
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:12800/healthcheck" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - xksms-net
+
+  skywalking-ui:
+    image: apache/skywalking-ui:10.2.0-java17
+    container_name: skywalking-ui
+    environment:
+      - SW_OAP_ADDRESS=http://skywalking-oap:12800
+      - SW_ZIPKIN_ADDRESS=http://skywalking-oap:9412
+    ports:
+      - "18080:8080"
+    depends_on:
+      skywalking-oap:
+        condition: service_healthy
+    networks:
+      - xksms-net
+
+networks:
+  xksms-net:
+    external: true
