@@ -23,6 +23,14 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
 								  Class<? extends HttpMessageConverter<?>> selectedConverterType,
 								  ServerHttpRequest request, ServerHttpResponse response) {
 		// 对于成功的响应，我们将其统一包装在Result.success()中
+		if (body == null) {
+			return Result.success();
+		}
+		// 如果body已经是Result类型，则直接返回，避免重复包装
+		if (body instanceof Result) {
+			return body;
+		}
+		// 否则，进行包装
 		return Result.success(body);
 	}
 }

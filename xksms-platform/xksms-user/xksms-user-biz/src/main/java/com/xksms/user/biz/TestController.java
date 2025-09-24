@@ -1,6 +1,7 @@
 package com.xksms.user.biz;
 
 
+import com.xksms.common.core.Result;
 import com.xksms.redis.RedisHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,12 @@ public class TestController {
 	private RedisHelper redisHelper;
 
 	@GetMapping("/trace")
-	public String trace() {
+	public Result<String> trace() {
 		log.info("traceIdasdas");
 		redisHelper.set("traceIdasdas", "sadsadsa");
 		Object traceIdasdas = redisHelper.get("traceIdasdas").get();
 		System.out.println("redis.get" + traceIdasdas);
-		return "traceIdasdas: sadsadsa";
+		return Result.success("traceIdasdas");
 	}
 
 	//错误
