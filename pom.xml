@@ -19,6 +19,8 @@
         <!-- 业务模块 -->
         <module>xksms-modules</module>
         <module>xksms-gateway</module>
+        <module>xksms-auth</module>
+        <module>xksms-platform</module>
     </modules>
 
     <properties>

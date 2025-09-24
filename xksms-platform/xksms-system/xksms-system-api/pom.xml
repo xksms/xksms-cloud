@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.xksms</groupId>
+        <artifactId>xksms-system</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>xksms-system-api</artifactId>
+    <packaging>jar</packaging>
+    <version>${revision}</version>
+    <name>${project.artifactId}</name>
+    <description>系统管理中心API模块 (契约定义)</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-user-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
+</project>

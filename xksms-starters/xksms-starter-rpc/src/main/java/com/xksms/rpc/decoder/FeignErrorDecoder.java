@@ -22,16 +22,16 @@ public record FeignErrorDecoder(ObjectMapper objectMapper) implements ErrorDecod
 			// 只有当响应体不为空时才尝试解析
 			if (!body.isEmpty()) {
 				Result<?> result = objectMapper.readValue(body, Result.class);
-				if (result.getCode() != 0 && result.getMessage() != null) {
+				if (result.code() != 0 && result.message() != null) {
 					IErrorCode remoteError = new IErrorCode() {
 						@Override
 						public int getCode() {
-							return result.getCode();
+							return result.code();
 						}
 
 						@Override
 						public String getMessage() {
-							return result.getMessage();
+							return result.message();
 						}
 					};
 					log.warn("远程调用 [{}] 失败, Code: {}, Message: {}", methodKey, remoteError.getCode(), remoteError.getMessage());

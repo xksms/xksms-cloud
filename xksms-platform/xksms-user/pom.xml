@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.xksms</groupId>
-        <artifactId>xksms-modules</artifactId>
+        <artifactId>xksms-platform</artifactId>
         <version>${revision}</version>
     </parent>
 
@@ -14,6 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>xksms-user-biz</module>
+        <module>xksms-user-api</module>
     </modules>
 
 
