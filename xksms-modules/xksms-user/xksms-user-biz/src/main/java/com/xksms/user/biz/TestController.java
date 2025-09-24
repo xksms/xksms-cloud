@@ -36,7 +36,7 @@ public class TestController {
 		throw new RuntimeException("error");
 	}
 
-	//一个占用cpu 和 200m内存的线程
+	// 一个主要用于模拟高 CPU 占用场景的测试接口
 	@GetMapping("/cpu")
 	public String cpu() {
 		for (int i = 0; i < 1000000000; i++) {
