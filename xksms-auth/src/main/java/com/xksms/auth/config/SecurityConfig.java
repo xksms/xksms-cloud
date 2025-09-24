@@ -1,7 +1,7 @@
 package com.xksms.auth.config;
 
-import com.xksms.auth.service.RemoteUserDetailsService;
-import lombok.RequiredArgsConstructor;
+import com.xksms.auth.infrastructure.tenant.filter.TenantContextFilter;
+import com.xksms.auth.service.TenantAwareUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -11,29 +11,40 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// File: xksms-auth/src/main/java/com/xksms/auth/config/SecurityConfig.java
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final RemoteUserDetailsService remoteUserDetailsService;
+        private final TenantAwareUserDetailsService tenantAwareUserDetailsService;
+        private final TenantContextFilter tenantContextFilter;
 
-	@Bean
-	@Order(2)
-	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.authorizeHttpRequests(authorize -> authorize
-						.anyRequest().authenticated()
-				)
-				.formLogin(Customizer.withDefaults()); // 启用表单登录
+        public SecurityConfig(TenantAwareUserDetailsService tenantAwareUserDetailsService,
+                        TenantContextFilter tenantContextFilter) {
+                this.tenantAwareUserDetailsService = tenantAwareUserDetailsService;
+                this.tenantContextFilter = tenantContextFilter;
+        }
 
-		// 关键：将我们的 UserDetailsService 配置进去
-		http.userDetailsService(remoteUserDetailsService);
+        @Bean
+        @Order(2)
+        public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .authorizeHttpRequests(authorize -> authorize
+                                                .requestMatchers("/.well-known/**", "/actuator/health", "/actuator/info", "/tenants/**")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .formLogin(Customizer.withDefaults())
+                                .logout(Customizer.withDefaults())
+                                .csrf(csrf -> csrf.ignoringRequestMatchers("/tenants/**"));
 
-		return http.build();
-	}
+                http.addFilterBefore(tenantContextFilter, UsernamePasswordAuthenticationFilter.class);
+
+                // 关键：将我们的 UserDetailsService 配置进去
+                http.userDetailsService(tenantAwareUserDetailsService);
+
+                return http.build();
+        }
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {

@@ -41,9 +41,7 @@ server:
 #    # 兼容多种头，避免你看到的 B3 null 提示 & 保证贯通
 #    propagation.type: [ w3c, b3, b3_multi ]
 
-
 # 环境特定配置（通过 Maven Profile 注入）
-
 
 logstash:
   host: 192.168.2.10
@@ -56,3 +54,38 @@ xksms:
     group: DEFAULT_GROUP
     username: nacos
     password: xksmsxksms
+  user:
+    tenants:
+      - id: public
+        name: 公共云默认租户
+        enabled: true
+        accounts:
+          - user-id: 1
+            username: admin
+            password: Admin@123
+            enabled: true
+            authorities:
+              - ROLE_PLATFORM_ADMIN
+              - message.read
+              - message.write
+            profile:
+              display-name: 超级管理员
+              email: admin@public.xksms.com
+              mobile: 18888888888
+              avatar: https://cdn.xksms.com/avatar/admin.png
+      - id: acme
+        name: Acme 企业租户
+        enabled: true
+        accounts:
+          - user-id: 2001
+            username: acme-admin
+            password: Admin@123
+            enabled: true
+            authorities:
+              - ROLE_TENANT_ADMIN
+              - acme.dashboard
+            profile:
+              display-name: Acme Administrator
+              email: admin@acme.example.com
+              mobile: 19999999999
+              avatar: https://cdn.xksms.com/avatar/acme-admin.png

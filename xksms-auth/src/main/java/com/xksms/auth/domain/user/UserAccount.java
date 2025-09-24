@@ -1,48 +1,40 @@
-package com.xksms.user.api.dto;
+package com.xksms.auth.domain.user;
 
+import com.xksms.auth.domain.tenant.TenantId;
 import lombok.Getter;
 
-import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
- * 用户认证视角下需要暴露给外部服务的账户数据。
- * <p>
- * 该 DTO 严格对应 xksms-user 服务在认证场景下的 API 契约，
- * 仅包含认证中心所需的凭证与权限信息，避免泄漏更多业务细节。
+ * SaaS 用户的聚合根，承载认证授权所需的核心信息。
  */
 @Getter
-public final class UserAuthDTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public final class UserAccount implements Serializable {
 
     private final Long userId;
-    private final String tenantId;
+    private final TenantId tenantId;
     private final String username;
     private final String password;
     private final boolean enabled;
     private final boolean accountLocked;
     private final boolean accountExpired;
     private final boolean credentialsExpired;
-    private final List<String> authorities;
-    private final UserProfileDTO profile;
+    private final Set<String> authorities;
 
-    private UserAuthDTO(Builder builder) {
+    private UserAccount(Builder builder) {
         this.userId = builder.userId;
-        this.tenantId = builder.tenantId;
-        this.username = builder.username;
-        this.password = builder.password;
+        this.tenantId = Objects.requireNonNull(builder.tenantId, "tenantId");
+        this.username = Objects.requireNonNull(builder.username, "username");
+        this.password = Objects.requireNonNull(builder.password, "password");
         this.enabled = builder.enabled;
         this.accountLocked = builder.accountLocked;
         this.accountExpired = builder.accountExpired;
         this.credentialsExpired = builder.credentialsExpired;
-        this.authorities = Collections.unmodifiableList(new ArrayList<>(builder.authorities));
-        this.profile = builder.profile;
+        this.authorities = Collections.unmodifiableSet(new LinkedHashSet<>(builder.authorities));
     }
 
     public static Builder builder() {
@@ -51,15 +43,14 @@ public final class UserAuthDTO implements Serializable {
 
     public static final class Builder {
         private Long userId;
-        private String tenantId;
+        private TenantId tenantId = TenantId.defaultTenant();
         private String username;
         private String password;
         private boolean enabled = true;
         private boolean accountLocked;
         private boolean accountExpired;
         private boolean credentialsExpired;
-        private final List<String> authorities = new ArrayList<>();
-        private UserProfileDTO profile;
+        private final Set<String> authorities = new LinkedHashSet<>();
 
         private Builder() {
         }
@@ -69,7 +60,7 @@ public final class UserAuthDTO implements Serializable {
             return this;
         }
 
-        public Builder tenantId(String tenantId) {
+        public Builder tenantId(TenantId tenantId) {
             this.tenantId = tenantId;
             return this;
         }
@@ -104,38 +95,22 @@ public final class UserAuthDTO implements Serializable {
             return this;
         }
 
-        public Builder authorities(List<String> authorities) {
-            this.authorities.clear();
-            if (authorities != null) {
-                authorities.stream()
-                        .filter(Objects::nonNull)
-                        .map(String::trim)
-                        .filter(value -> !value.isEmpty())
-                        .forEach(this.authorities::add);
-            }
-            return this;
-        }
-
         public Builder addAuthority(String authority) {
-            if (authority != null) {
-                String trimmed = authority.trim();
-                if (!trimmed.isEmpty()) {
-                    this.authorities.add(trimmed);
-                }
+            if (authority != null && !authority.isBlank()) {
+                this.authorities.add(authority.trim());
             }
             return this;
         }
 
-        public Builder profile(UserProfileDTO profile) {
-            this.profile = profile;
+        public Builder authorities(Set<String> authorities) {
+            if (authorities != null) {
+                authorities.forEach(this::addAuthority);
+            }
             return this;
         }
 
-        public UserAuthDTO build() {
-            Objects.requireNonNull(tenantId, "tenantId must not be null");
-            Objects.requireNonNull(username, "username must not be null");
-            Objects.requireNonNull(password, "password must not be null");
-            return new UserAuthDTO(this);
+        public UserAccount build() {
+            return new UserAccount(this);
         }
     }
 }

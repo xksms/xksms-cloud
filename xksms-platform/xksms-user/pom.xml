@@ -13,8 +13,8 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
     <modules>
-        <module>xksms-user-biz</module>
         <module>xksms-user-api</module>
+        <module>xksms-user-biz</module>
     </modules>
 
 

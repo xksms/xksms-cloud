@@ -1,4 +1,3 @@
-// File: xksms-user-api/src/main/java/com/xksms/user/api/feign/UserFeignClient.java
 package com.xksms.user.api.feign;
 
 import com.xksms.common.core.Result;
@@ -8,19 +7,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
- * 用户服务 Feign 客户端接口。
- * [name]: 必须与用户服务的 spring.application.name 一致。
- * [path]: 定义一个统一的 API 前缀。
+ * 用户中心内部鉴权相关的 Feign 客户端契约。
  */
-@FeignClient(name = "xksms-user", path = "/users")
+@FeignClient(value = "xksms-user", contextId = "userAuthClient", path = "/internal/tenants")
 public interface UserFeignClient {
 
     /**
-     * 根据用户名查询用户信息（供内部认证使用）。
+     * 根据租户和用户名查询认证信息。
      *
-     * @param username 用户名
-     * @return 包含用户认证信息的 Result 对象
+     * @param tenantId 租户标识
+     * @param username 登录用户名
+     * @return 统一响应结构，成功时 data 为 {@link UserAuthDTO}
      */
-    @GetMapping("/internal/details/{username}")
-    Result<UserAuthDTO> getUserDetailsByUsername(@PathVariable("username") String username);
+    @GetMapping("/{tenantId}/users/{username}")
+    Result<UserAuthDTO> getUserDetailsByUsername(@PathVariable("tenantId") String tenantId,
+            @PathVariable("username") String username);
 }
