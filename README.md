@@ -176,3 +176,15 @@ xksms-cloud
 3.  提交代码
 4.  新建 Pull Request
 
+
+## 🌐 前端控制台（xksms-frontend）
+
+- 技术栈：Vite + React 18 + TypeScript + React Router + React Query。
+- 功能概览：
+  - ✅ 用户中心接口调试：支持通过用户 ID 调用 `/users/{id}` 接口并展示全局统一响应包装结果。
+  - ✅ 通知流观测：基于 Server-Sent Events 连接 `/notifications/stream/{userId}`，实时展示最新 50 条通知消息。
+- 快速开始：
+  1. `cd xksms-frontend`
+  2. `npm install`
+  3. `npm run dev`
+- 环境变量：通过 `VITE_API_BASE_URL` 指定后端网关地址（默认 `http://localhost:8080`）。
