@@ -1,6 +1,6 @@
 spring:
   application:
-    name: xksms-user
+    name: xksms-auth
   profiles:
     active: @spring.profiles.active@
   config:

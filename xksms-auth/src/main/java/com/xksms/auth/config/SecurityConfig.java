@@ -24,14 +24,25 @@ public class SecurityConfig {
 	@Order(2)
 	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 		http
+				.csrf(csrf -> csrf.ignoringRequestMatchers(
+						"/oauth2/token",
+						"/oauth2/introspect",
+						"/oauth2/revoke"
+				))
 				.authorizeHttpRequests(authorize -> authorize
+						.requestMatchers(
+								"/actuator/**",
+								"/.well-known/**",
+								"/oauth2/jwks",
+								"/oauth2/token",
+								"/oauth2/introspect",
+								"/oauth2/revoke"
+						).permitAll()
 						.anyRequest().authenticated()
 				)
-				.formLogin(Customizer.withDefaults()); // 启用表单登录
+				.formLogin(Customizer.withDefaults());
 
-		// 关键：将我们的 UserDetailsService 配置进去
 		http.userDetailsService(remoteUserDetailsService);
-
 		return http.build();
 	}
 
