@@ -12,32 +12,42 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-// File: xksms-auth/src/main/java/com/xksms/auth/config/SecurityConfig.java
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final RemoteUserDetailsService remoteUserDetailsService;
+    private final RemoteUserDetailsService remoteUserDetailsService;
 
-	@Bean
-	@Order(2)
-	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.authorizeHttpRequests(authorize -> authorize
-						.anyRequest().authenticated()
-				)
-				.formLogin(Customizer.withDefaults()); // 启用表单登录
+    @Bean
+    @Order(2)
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.ignoringRequestMatchers(
+                        "/oauth2/token",
+                        "/oauth2/introspect",
+                        "/oauth2/revoke"
+                ))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/actuator/**",
+                                "/.well-known/**",
+                                "/oauth2/jwks",
+                                "/oauth2/token",
+                                "/oauth2/introspect",
+                                "/oauth2/revoke"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(Customizer.withDefaults());
 
-		// 关键：将我们的 UserDetailsService 配置进去
-		http.userDetailsService(remoteUserDetailsService);
+        http.userDetailsService(remoteUserDetailsService);
 
-		return http.build();
-	}
+        return http.build();
+    }
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		// 必须提供一个密码编码器
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

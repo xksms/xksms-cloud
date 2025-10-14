@@ -53,8 +53,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-openfeign-core</artifactId>
+            <groupId>com.xksms</groupId>
+            <artifactId>xksms-starter-rpc</artifactId>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 
