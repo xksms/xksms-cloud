@@ -40,14 +40,12 @@
 
         <dependency>
             <groupId>com.xksms</groupId>
-            <artifactId>xksms-common</artifactId>
-            <version>${revision}</version>
+            <artifactId>xksms-common-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-rpc</artifactId>
-            <version>${revision}</version>
         </dependency>
 
 

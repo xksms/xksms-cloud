@@ -1,0 +1,98 @@
+---
+# XKSMS-Auth Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xksms-auth
+  namespace: xksms-cloud
+  labels:
+    app: xksms-auth
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: xksms-auth
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: xksms-auth
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+        - name: auth
+          image: xksms-auth:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+              name: http
+              protocol: TCP
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: xksms-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: NACOS_SERVER_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: xksms-config
+                  key: NACOS_SERVER_ADDR
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql-host:3306/xksms_auth?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: xksms-secrets
+                  key: MYSQL_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xksms-secrets
+                  key: MYSQL_PASSWORD
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+---
+# XKSMS-Auth Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: xksms-auth
+  namespace: xksms-cloud
+  labels:
+    app: xksms-auth
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8081
+      targetPort: 8081
+      name: http
+  selector:
+    app: xksms-auth

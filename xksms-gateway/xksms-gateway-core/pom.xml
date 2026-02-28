@@ -26,7 +26,6 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-redis</artifactId>
-            <version>${revision}</version>
         </dependency>
 
         <dependency>
@@ -38,17 +37,6 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-nacos</artifactId>
-            <version>${revision}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.alibaba.nacos</groupId>
-                    <artifactId>nacos-logback-adapter-12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.alibaba.nacos</groupId>
-                    <artifactId>logback-adapter</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- RPC 远程调用相关 -->
         <dependency>
@@ -62,7 +50,6 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-log</artifactId>
-            <version>${revision}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -73,19 +60,16 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-observability</artifactId>
-            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-webflux</artifactId>
-            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>com.xksms</groupId>
-            <artifactId>xksms-common</artifactId>
-            <version>${revision}</version>
+            <artifactId>xksms-common-core</artifactId>
         </dependency>
 
         <dependency>

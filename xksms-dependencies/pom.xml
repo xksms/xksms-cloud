@@ -6,12 +6,13 @@
 
     <groupId>com.xksms</groupId>
     <artifactId>xksms-dependencies</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>xksms-cloud 的依赖版本管理（JDK 21 / Boot 3.5.4 / Cloud 2025.0.0）</description>
 
     <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
         <java.version>21</java.version>
 
         <!-- 平台对齐 -->
@@ -33,6 +34,10 @@
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <caffeine.version>3.1.8</caffeine.version>
         <micrometer.version>1.14.5</micrometer.version>
+
+        <!-- 基础设施组件版本 -->
+        <flyway-mysql.version>10.12.0</flyway-mysql.version>
+        <jasypt-spring-boot.version>3.0.5</jasypt-spring-boot.version>
 
     </properties>
 
@@ -141,6 +146,101 @@
                 <artifactId>spring-boot-configuration-processor</artifactId>
                 <version>${spring-boot.version}</version>
                 <scope>provided</scope>
+            </dependency>
+
+            <!-- ==================== 基础设施组件 ==================== -->
+            <!-- Flyway 数据库迁移工具 -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-mysql</artifactId>
+                <version>${flyway-mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway-mysql.version}</version>
+            </dependency>
+
+            <!-- Jasypt 配置加密 -->
+            <dependency>
+                <groupId>com.github.ulisesbocchio</groupId>
+                <artifactId>jasypt-spring-boot-starter</artifactId>
+                <version>${jasypt-spring-boot.version}</version>
+            </dependency>
+
+            <!-- ==================== 内部模块 BOM ==================== -->
+            <!-- 统一管理内部模块版本，避免硬编码 -->
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-common</artifactId>
+                <version>${revision}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-common-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-common-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-user-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-system-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-webflux</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-security</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-nacos</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-redis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-cache</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-log</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-observability</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-starter-rpc</artifactId>
+                <version>${revision}</version>
             </dependency>
 
         </dependencies>

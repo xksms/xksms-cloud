@@ -1,0 +1,812 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cce90bb1-db24-4548-a904-c44fed366334" name="更改" comment="feat(auth): 初始化统一认证授权中心模块&#10;&#10;- 新增 README.md 文档，详细描述模块功能、结构与启动方式&#10;- 更新 application.yml 应用名称为 xksms-auth&#10;- 替换 Maven 依赖 spring-cloud-openfeign-core为 xksms-starter-rpc- 完善 RemoteUserDetailsService 实现，增强用户信息加载逻辑与异常处理&#10;-优化 SecurityConfig 配置，细化 CSRF 忽略路径与接口权限控制" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CompilerWorkspaceConfiguration">
+    <option name="MAKE_PROJECT_ON_SAVE" value="true" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_D:/code/xksms-cloud" value="2z2cKkdjGd8A94BWbNkjY019pPV" />
+    </persistenceIdMap>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="package-info" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="refactor/architecture-improvement" />
+                    <option name="lastUsedInstant" value="1772263312" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="dev-auth" />
+                    <option name="lastUsedInstant" value="1758692813" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="master" />
+                    <option name="lastUsedInstant" value="1758692607" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="dev-log" />
+                    <option name="lastUsedInstant" value="1755596706" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="dev-gateway" />
+                    <option name="lastUsedInstant" value="1754550800" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/ch/qos/logback/logback-classic/1.4.14/logback-classic-1.4.14.jar!/ch/qos/logback/classic/LoggerContext.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/apache/skywalking/apm-toolkit-trace/9.4.0/apm-toolkit-trace-9.4.0.jar!/org/apache/skywalking/apm/toolkit/trace/TraceContext.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/apache/skywalking/apm-toolkit-webflux/9.4.0/apm-toolkit-webflux-9.4.0.jar!/org/apache/skywalking/apm/toolkit/webflux/WebFluxSkyWalkingOperators.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.33/tomcat-embed-core-10.1.33.jar!/org/apache/catalina/core/ApplicationFilterChain.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/cloud/spring-cloud-commons/4.1.5/spring-cloud-commons-4.1.5.jar!/org/springframework/cloud/commons/config/DefaultsBindHandlerAdvisor.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/cloud/spring-cloud-gateway-server/4.1.6/spring-cloud-gateway-server-4.1.6-sources.jar!/org/springframework/cloud/gateway/filter/headers/observation/ObservedResponseHttpHeadersFilter.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/cloud/spring-cloud-gateway-server/4.1.6/spring-cloud-gateway-server-4.1.6-sources.jar!/org/springframework/cloud/gateway/handler/RoutePredicateHandlerMapping.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/cloud/spring-cloud-gateway-server/4.1.6/spring-cloud-gateway-server-4.1.6.jar!/org/springframework/cloud/gateway/filter/GlobalFilter.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/security/spring-security-config/6.5.2/spring-security-config-6.5.2-sources.jar!/org/springframework/security/config/Customizer.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/security/spring-security-config/6.5.2/spring-security-config-6.5.2-sources.jar!/org/springframework/security/config/annotation/SecurityConfigurer.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/security/spring-security-config/6.5.2/spring-security-config-6.5.2-sources.jar!/org/springframework/security/config/annotation/web/builders/HttpSecurity.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/security/spring-security-core/6.5.2/spring-security-core-6.5.2.jar!/org/springframework/security/core/context/SecurityContext.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../program/maven/apache-maven-3.9.6/repository/org/springframework/boot/spring-boot-autoconfigure/3.2.12/spring-boot-autoconfigure-3.2.12-sources.jar!/org/springframework/boot/autoconfigure/data/mongo/MongoDatabaseFactoryDependentConfiguration.java" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="JRebelWorkspace">
+    <option name="jrebelEnabledAutocompile" value="true" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="customMavenHome" value="D:\program\maven\apache-maven-3.9.6" />
+        <option name="localRepository" value="D:\Java\maven\repository" />
+        <option name="mavenHomeTypeForPersistence" value="CUSTOM" />
+        <option name="useMavenConfig" value="false" />
+        <option name="userSettingsFile" value="D:\program\maven\apache-maven-3.9.6\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="MavenRunner">
+    <option name="environmentProperties">
+      <map>
+        <entry key="JAVA_TOOL_OPTIONS" value="-Dfile.encoding=UTF-8" />
+      </map>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2z2cKkdjGd8A94BWbNkjY019pPV" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Maven.xksms-auth [install].executor": "Run",
+    "Maven.xksms-cloud [clean].executor": "Run",
+    "Maven.xksms-cloud [compile].executor": "Run",
+    "Maven.xksms-cloud [install].executor": "Run",
+    "Maven.xksms-cloud [verify].executor": "Run",
+    "Maven.xksms-user-biz [clean].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHELLCHECK.PATH": "C:\\Users\\12623\\AppData\\Roaming\\JetBrains\\IntelliJIdea2025.1\\plugins\\Shell Script\\shellcheck.exe",
+    "Spring Boot.AuthApplication.executor": "Debug",
+    "Spring Boot.GatewayApplication.executor": "Debug",
+    "Spring Boot.XksmsNotifyApplication.executor": "Debug",
+    "Spring Boot.XksmsUserApplication (1).executor": "Debug",
+    "Spring Boot.XksmsUserApplication.executor": "Debug",
+    "git-widget-placeholder": "refactor/architecture-improvement",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/code/xksms-cloud/xksms-platform",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "D:/code/xksms-cloud/xksms-modules/xksms-user/xksms-user-api/src/main/java/com/xksms/Main.java",
+    "project.structure.last.edited": "项目",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.43103448",
+    "run.configurations.included.in.services": "true",
+    "service.view.auto.scroll.to.source": "true",
+    "settings.editor.selected.configurable": "reference.settings.project.maven.runner",
+    "vue.rearranger.settings.migration": "true",
+    "应用程序.Main.executor": "Debug",
+    "应用程序.TestController.executor": "Debug",
+    "应用程序.XksmsNotifyApplication.executor": "Run"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql",
+      "org.gjt.mm.mysql.Driver"
+    ],
+    "stardust.markdown.MarkdownSplitEditorSuppressor:keyList": []
+  }
+}]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RebelAgentSelection">
+    <selection>jr</selection>
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\code\xksms-cloud\xksms-platform" />
+      <recent name="D:\code\xksms-cloud\xksms-auth\src\main\resources" />
+      <recent name="D:\code\xksms-cloud\xksms-modules\xksms-notify\xksms-notify-biz\src\main\resources" />
+      <recent name="D:\code\xksms-cloud\xksms-starters\xksms-starter-rpc\src\main\resources" />
+      <recent name="D:\code\xksms-cloud\xksms-starters\xksms-starter-redis" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\code\xksms-cloud\xksms-platform" />
+      <recent name="D:\code\xksms-cloud\xksms-starters\xksms-starter-web\src\main\java\com\xksms\web" />
+      <recent name="D:\code\xksms-cloud\xksms-starters\xksms-starter-cache\src\main\java\com\xksms\config" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.xksms.elk.config" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+    <option name="configurationStatuses">
+      <map>
+        <entry key="SpringBootApplicationConfigurationType">
+          <value>
+            <map>
+              <entry key="AuthApplication" value="FAILED" />
+              <entry key="GatewayApplication" value="STOPPED" />
+              <entry key="XksmsNotifyApplication" value="STOPPED" />
+              <entry key="XksmsUserApplication" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.XksmsUserApplication">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.xksms.Main" />
+      <module name="xksms-user-biz" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.xksms.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestController" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.xksms.user.TestController" />
+      <module name="xksms-user-biz" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.xksms.user.service.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="XksmsNotifyApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.xksms.notify.biz.XksmsNotifyApplication" />
+      <module name="xksms-notify-biz" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.xksms.notify.biz.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AuthApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="xksms-auth" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.xksms.auth.AuthApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="xksms-gateway-core" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.xksms.gateway.core.GatewayApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.xksms.gateway.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="XksmsNotifyApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="xksms-notify-biz" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.xksms.notify.biz.XksmsNotifyApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.xksms.notify.biz.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="XksmsUserApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="xksms-user-biz" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.xksms.user.biz.XksmsUserApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Spring Boot.AuthApplication" />
+      <item itemvalue="Spring Boot.XksmsUserApplication" />
+      <item itemvalue="Spring Boot.GatewayApplication" />
+      <item itemvalue="Spring Boot.XksmsNotifyApplication" />
+      <item itemvalue="应用程序.Main" />
+      <item itemvalue="应用程序.TestController" />
+      <item itemvalue="应用程序.XksmsNotifyApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.GatewayApplication" />
+        <item itemvalue="应用程序.XksmsNotifyApplication" />
+        <item itemvalue="应用程序.TestController" />
+        <item itemvalue="应用程序.Main" />
+        <item itemvalue="Spring Boot.XksmsNotifyApplication" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="StructureViewState">
+    <option name="selectedTab" value="逻辑" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="cce90bb1-db24-4548-a904-c44fed366334" name="更改" comment="" />
+      <created>1724478112067</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1724478112067</updated>
+      <workItem from="1750932548238" duration="4321000" />
+      <workItem from="1751015859042" duration="5000" />
+      <workItem from="1751426993644" duration="685000" />
+      <workItem from="1751436298992" duration="592000" />
+      <workItem from="1751449358483" duration="5667000" />
+      <workItem from="1751512069464" duration="14706000" />
+      <workItem from="1751536957978" duration="12418000" />
+      <workItem from="1751620670751" duration="2973000" />
+      <workItem from="1751858878417" duration="58000" />
+      <workItem from="1751858967048" duration="5886000" />
+      <workItem from="1751943100636" duration="32000" />
+      <workItem from="1751943160732" duration="778000" />
+      <workItem from="1752052053720" duration="1033000" />
+      <workItem from="1752114294435" duration="241000" />
+      <workItem from="1752130137072" duration="2045000" />
+      <workItem from="1752251074291" duration="661000" />
+      <workItem from="1752255304208" duration="982000" />
+      <workItem from="1752454894128" duration="300000" />
+      <workItem from="1752455335023" duration="1317000" />
+      <workItem from="1752715617202" duration="405000" />
+      <workItem from="1752743820825" duration="910000" />
+      <workItem from="1752749505764" duration="156000" />
+      <workItem from="1752848154451" duration="2062000" />
+      <workItem from="1752896589747" duration="12277000" />
+      <workItem from="1752990409047" duration="818000" />
+      <workItem from="1752991290582" duration="13367000" />
+      <workItem from="1753084709589" duration="5119000" />
+      <workItem from="1753145977315" duration="126000" />
+      <workItem from="1753146966587" duration="1364000" />
+      <workItem from="1753163691525" duration="4974000" />
+      <workItem from="1753176143077" duration="155000" />
+      <workItem from="1753176309668" duration="10866000" />
+      <workItem from="1753276605501" duration="2435000" />
+      <workItem from="1753320643831" duration="591000" />
+      <workItem from="1753349597680" duration="592000" />
+      <workItem from="1753855509844" duration="847000" />
+      <workItem from="1753857002062" duration="9208000" />
+      <workItem from="1753924443886" duration="1813000" />
+      <workItem from="1753926284245" duration="37588000" />
+      <workItem from="1754210609976" duration="487000" />
+      <workItem from="1754269743107" duration="4388000" />
+      <workItem from="1754276094398" duration="11644000" />
+      <workItem from="1754294148703" duration="6543000" />
+      <workItem from="1754375142658" duration="5944000" />
+      <workItem from="1754384674626" duration="4965000" />
+      <workItem from="1754449423883" duration="41036000" />
+      <workItem from="1754550928596" duration="43000" />
+      <workItem from="1754550987876" duration="68000" />
+      <workItem from="1754551077480" duration="953000" />
+      <workItem from="1754552320629" duration="40344000" />
+      <workItem from="1755047286602" duration="1999000" />
+      <workItem from="1755133168502" duration="128000" />
+      <workItem from="1755133310682" duration="303000" />
+      <workItem from="1755133900007" duration="25000" />
+      <workItem from="1755253648212" duration="305000" />
+      <workItem from="1755479440026" duration="597000" />
+      <workItem from="1755480807434" duration="1209000" />
+      <workItem from="1755573667291" duration="228000" />
+      <workItem from="1755588167346" duration="18795000" />
+      <workItem from="1755769907174" duration="442000" />
+      <workItem from="1755795165093" duration="838000" />
+      <workItem from="1755843724856" duration="2242000" />
+      <workItem from="1755849209210" duration="15133000" />
+      <workItem from="1756092906393" duration="2835000" />
+      <workItem from="1756111862174" duration="22180000" />
+      <workItem from="1756201207061" duration="583000" />
+      <workItem from="1756258612587" duration="3483000" />
+      <workItem from="1756688850517" duration="69000" />
+      <workItem from="1756689080323" duration="101000" />
+      <workItem from="1756689197632" duration="8101000" />
+      <workItem from="1756783903057" duration="14679000" />
+      <workItem from="1757043638195" duration="1374000" />
+      <workItem from="1757483375154" duration="12825000" />
+      <workItem from="1757553655650" duration="565000" />
+      <workItem from="1757570245242" duration="822000" />
+      <workItem from="1757571348094" duration="562000" />
+      <workItem from="1757572651116" duration="28000" />
+      <workItem from="1758261702303" duration="11719000" />
+      <workItem from="1758503946353" duration="3000" />
+      <workItem from="1758503974307" duration="103000" />
+      <workItem from="1758504448520" duration="124000" />
+      <workItem from="1758683246244" duration="2317000" />
+      <workItem from="1760422301919" duration="4307000" />
+      <workItem from="1764120335544" duration="991000" />
+      <workItem from="1770773504342" duration="165000" />
+      <workItem from="1772262626525" duration="5950000" />
+    </task>
+    <task id="LOCAL-00001" summary="feat(starters): 新增日志和安全模块的自动配置&#10;&#10;- 新增 xksms-starter-log 和 xksms-starter-security模块&#10;- 实现了日志和安全相关的自动配置&#10;- 添加了 JWT 认证和日志用户信息注入的功能&#10;-优化了项目结构，提高了模块的可复用性和可维护性">
+      <option name="closed" value="true" />
+      <created>1750933459489</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1750933459489</updated>
+    </task>
+    <task id="LOCAL-00002" summary="refactor(xksms-common): 更新代码包名&#10;&#10;- 将 cn.xksms 包名改为 com.xksms&#10;- 修改了 HeaderConstants 和 IntArrayValuable 类的包名&#10;- 更新了 constant 和 core 包的 package-info.java 文件">
+      <option name="closed" value="true" />
+      <created>1750986842743</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1750986842743</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat(starters): 添加 ELK 和可观测性启动器&#10;&#10;- 新增 xksms-starter-elk 模块，用于统一接入 ELK 日志格式&#10;- 新增 xksms-starter-observability 模块，封装监控指标与链路追踪&#10;- 更新 xksms-starters/pom.xml，添加新模块引用">
+      <option name="closed" value="true" />
+      <created>1751427025007</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1751427025007</updated>
+    </task>
+    <task id="LOCAL-00004" summary="feat(xksms-user): 添加用户业务模块并集成 ELK 日志系统&#10;&#10;- 新增 xksms-user 模块，包含用户业务逻辑&#10;- 集成 ELK 日志系统，实现日志采集和分析&#10;- 添加 LogAutoConfiguration 和 LogbackConfiguration 类进行日志配置&#10;- 新增 TraceIdMdcFilter 过滤器，用于添加追踪 ID 到日志&#10;- 更新 logback-spring.xml 配置，支持日志输出到 Logstash&#10;- 修改 logstash.conf 配置，优化日志处理流程">
+      <option name="closed" value="true" />
+      <created>1751524364135</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1751524364135</updated>
+    </task>
+    <task id="LOCAL-00005" summary="refactor(xksms): 重命名 logback 配置文件并优化日志配置&#10;&#10;- 将 logback-spring.xml 重命名为 logback-elk.xml&#10;- 添加 appName 动态配置项&#10;- 更新 globalCustomFields 中的 appName引用&#10;- 修正 Spring Boot 版本属性名称&#10;-引入 Spring Boot Maven 插件并配置 Lombok 排除- 将 Maven Compiler Plugin 版本改为使用属性引用">
+      <option name="closed" value="true" />
+      <created>1751528383642</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1751528383642</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat(log): 重新配置日志输出&#10;&#10;- 新增 IpConfig 类获取本地 IP 地址&#10;- 修改 logback-spring.xml 配置文件，增加 STDOUT appender 输出到控制台&#10;- 更新日志输出格式，包含 IP 地址和 traceId&#10;- 删除 logback-console.xml 配置文件&#10;- 重命名 logback-elk.xml 为 logback-spring.xml">
+      <option name="closed" value="true" />
+      <created>1751530956276</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1751530956276</updated>
+    </task>
+    <task id="LOCAL-00007" summary="refactor(xksms-starter-log): 重构日志模块并移除 Elk 相关代码&#10;&#10;- 将 IpConfig、LogAutoConfiguration 和 LogbackConfiguration 从 elk包移动到 log 包&#10;- 删除 LogAutoConfiguration 中的 logbackConfiguration 方法&#10;- 更新 logback-spring.xml 配置，增加 Logstash Appender&#10;- 移除 xksms-starter-elk模块，合并到 xksms-starter-log 中&#10;- 更新相关依赖和模块结构">
+      <option name="closed" value="true" />
+      <created>1751531882266</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1751531882266</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat(observability): 新增可观测性模块并更新日志配置&#10;&#10;- 移除 xksms-starter-log 中的 Logback配置&#10;- 新增 xksms-starter-observability 模块，包含 Logback 配置&#10;- 更新 logback-spring.xml，引入新的 logback-observability.xml 配置文件&#10;- 修改相关模块的依赖，使用新的 xksms-starter-observability代替 xksms-starter-log- 在项目中添加环境配置文件">
+      <option name="closed" value="true" />
+      <created>1751591306836</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1751591306836</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat(xksms-user): 添加观测性配置并启用 SkyWalking&#10;&#10;- 在 xksms-user-biz模块中添加 application.yml 配置文件&#10;- 设置 Spring profiles为 observability&#10;- 新增 SkyWalking 相关配置">
+      <option name="closed" value="true" />
+      <created>1751609822849</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1751609822849</updated>
+    </task>
+    <task id="LOCAL-00010" summary="refactor(dependencies): 重构依赖版本管理&#10;&#10;- 将 Logback 相关依赖移至 xksms-starter-observability 模块&#10;- 更新 Spring Boot、Spring Cloud 和其他依赖的版本&#10;- 添加 SkyWalking 和 JWT 相关依赖&#10;- 优化 pom.xml 文件结构，提高可读性和维护性">
+      <option name="closed" value="true" />
+      <created>1751610856301</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1751610856301</updated>
+    </task>
+    <task id="LOCAL-00011" summary="build(xksms-user): 优化日志配置和项目属性&#10;&#10;- 更新 logback-spring.xml，增加 SkyWalking traceId 转换规则&#10;- 降低 Spring 和 MyBatis 日志级别，减少噪声&#10;- 移除 xksms-user 模块的冗余属性配置">
+      <option name="closed" value="true" />
+      <created>1751622774752</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1751622774752</updated>
+    </task>
+    <task id="LOCAL-00012" summary="feat(observability): 添加 Prometheus 和 Micrometer 集成&#10;&#10;- 实现了全局标签注册定制器，用于在 MeterRegistry 中添加通用标签&#10;- 添加了默认的 observability 配置文件，包含 Prometheus 和 Actuator 配置&#10;- 创建了自动配置类，用于自动配置 MeterRegistryCustomizer&#10;-定义了 ObservabilityProperties 类，用于配置全局标签&#10;- 更新了项目 pom.xml，添加了必要的依赖&#10;- 新增了 README.md，详细介绍了组件功能和使用方法">
+      <option name="closed" value="true" />
+      <created>1752901079709</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1752901079709</updated>
+    </task>
+    <task id="LOCAL-00013" summary="feat(docker): 添加 Prometheus 和 Grafana 的 Docker Compose 配置&#10;&#10;- 新增 Prometheus 和 Grafana 的 Docker Compose 配置文件&#10;- 配置 Prometheus 抓取 xksms-metrics 数据- 设置 Grafana 环境变量和数据卷&#10;- 添加 Prometheus 配置文件，设置全局配置和抓取任务">
+      <option name="closed" value="true" />
+      <created>1752943233314</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1752943233314</updated>
+    </task>
+    <task id="LOCAL-00014" summary="build(xksms-dependencies): 添加 Caffeine 本地缓存依赖&#10;&#10;- 在 properties 中添加 caffeine.version 属性，版本号为 3.1.8&#10;- 在 dependencyManagement 中添加 Caffeine 依赖，groupId 为 com.github.ben-manes.caffeine">
+      <option name="closed" value="true" />
+      <created>1753069308852</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1753069308852</updated>
+    </task>
+    <task id="LOCAL-00015" summary="refactor(docker): 重构 Logstash 配置并简化 README 文档&#10;&#10;- 精简 Logstash 配置，移除了特定模块的日志处理逻辑&#10;-优化日志索引生成方式，使用 appName 动态生成索引前缀&#10;- 删除了 README 文档中的冗余内容，增加了目录结构的代码块">
+      <option name="closed" value="true" />
+      <created>1753076304712</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1753076304712</updated>
+    </task>
+    <task id="LOCAL-00016" summary="feat(user): 添加观测性支持并更新 Prometheus 和 Grafana 版本&#10;&#10;- 在 application.yml 中添加观测性配置导入&#10;- 更新 Prometheus镜像版本至 3.4.2&#10;- 更新 Grafana 镜像版本至 12.0.2&#10;- 添加 xksms-starter-observability 依赖">
+      <option name="closed" value="true" />
+      <created>1753080835779</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1753080835779</updated>
+    </task>
+    <task id="LOCAL-00017" summary="infrastructure(docker): 统一 Docker 服务网络并添加新组件&#10;&#10;- 将所有 Docker 服务的网络统一为 xksms-net&#10;- 添加 MySQL、Nacos、Redis 和 SkyWalking 组件的 Docker Compose 文件&#10;- 创建初始化网络的脚本 init-network.sh&#10;- 调整 Prometheus 和 Grafana 的网络配置&#10;- 更新 ELK Stack 组件的网络配置">
+      <option name="closed" value="true" />
+      <created>1753092385867</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1753092385867</updated>
+    </task>
+    <task id="LOCAL-00018" summary="network(xksms-net): 设置为外部网络并统一配置&#10;&#10;-将 xksms-net 设置为外部网络，避免重复创建&#10;-统一网络配置格式，提高可读性&#10;- 调整 Nacos 配置，使用 root 用户连接 MySQL&#10;- 为 Prometheus 添加外部网络配置&#10;- 移除 Redis 配置中的版本号">
+      <option name="closed" value="true" />
+      <created>1753146118670</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1753146118670</updated>
+    </task>
+    <task id="LOCAL-00019" summary="feat(xksms-user): 整合 Nacos 服务注册与发现功能&#10;&#10;- 新增 xksms-starter-nacos 模块，提供开箱即用的 Nacos 集成&#10;- 更新 xksms-user-biz 模块，引入 Nacos 支持- 添加 Nacos 相关配置和自动配置类&#10;- 优化日志配置，支持多环境- 更新 README 文档，添加 Nacos 集成说明">
+      <option name="closed" value="true" />
+      <created>1753928996840</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1753928996840</updated>
+    </task>
+    <task id="LOCAL-00020" summary="docs(xksms-starter-nacos): 重构 README 文档&#10;&#10;- 更新文档结构，增加设计哲学、功能特性等新章节&#10;-详细说明配置项，包括基础配置、服务发现配置和配置中心配置&#10;- 添加共享配置的高级用法示例&#10;- 更新版本兼容信息&#10;- 移除故障排除部分，减少文档冗余">
+      <option name="closed" value="true" />
+      <created>1753930658370</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1753930658370</updated>
+    </task>
+    <task id="LOCAL-00021" summary="feat(gateway): 实现网关核心模块并添加可观测性支持&#10;&#10;- 新增 xksms-gateway-core 模块，实现动态路由、全局鉴权等功能&#10;- 添加自定义 Nacos 配置和日志配置&#10;- 实现了基于 Micrometer 的观测能力，包括请求日志和指标收集- 新增 TraceId 传播和 MDC 桥接功能，支持 SkyWalking 和 WebFlux- 重构了日志配置，采用 Logstash 编码器统一日志格式">
+      <option name="closed" value="true" />
+      <created>1754463287154</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1754463287154</updated>
+    </task>
+    <task id="LOCAL-00022" summary="docs(XKSMS): 更新命名空间与属性治理规范并新增监控计划文档&#10;&#10;- 更新《XKSMS 命名空间与属性治理规范（草案）》&#10;  - 增加可观测性指标（Metrics）的命名规范 - 调整部分命名示例和格式&#10;  - 移除 JSON 字段命名规范和扩展建议等内容&#10;&#10;- 新增《XKSMS-Cloud Micrometer 自动化监控全能力落地计划》文档&#10;  - 制定 Micrometer 监控能力在 xksms-cloud 项目中的全面集成计划  - 包含 JVM、系统、Web、数据库、消息等多方面的监控任务&#10;  - 提出监控成果验收标准和核心监控指标字典的构建要求">
+      <option name="closed" value="true" />
+      <created>1754548871335</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1754548871335</updated>
+    </task>
+    <task id="LOCAL-00023" summary="refactor(xksms): 移除 WebFlux 相关代码并调整日志记录方式&#10;&#10;- 删除了 WebFlux 相关的观测和过滤代码&#10;-移除了自定义的日志切面&#10;- 调整了日志记录依赖，使用 Spring Boot 默认的日志记录机制&#10;- 清理了不必要的依赖项">
+      <option name="closed" value="true" />
+      <created>1754552679867</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1754552679867</updated>
+    </task>
+    <task id="LOCAL-00024" summary="feat(observability): 实现基于 Micrometer 和 OpenTelemetry 的链路追踪&#10;&#10;- 在 xksms-gateway 和 xksms-user模块中添加了 Tracing配置&#10;- 新增 MdcContextAutoConfiguration 和 MdcInjectingObservationHandler 以支持 MDC 日志&#10;- 更新依赖版本：  - micrometer.version: 1.1.3 -&gt; 1.14.5&#10;  - 新增 opentelemetry-bom 和 opentelemetry-exporter-otlp-http 依赖&#10;- 移除了 context-propagation 依赖&#10;- 新增 XKSMS-Cloud 可观测性开发规范文档">
+      <option name="closed" value="true" />
+      <created>1754645015049</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1754645015049</updated>
+    </task>
+    <task id="LOCAL-00025" summary="feat(log): 重构日志系统并支持 Filebeat&#10;&#10;- 更新 Logback 配置，增加 JSON 日志输出到文件&#10;- 新增 Filebeat 配置文件，用于采集 JSON 日志&#10;- 修改 Logstash 配置，支持接收 Filebeat 传输的日志&#10;- 更新项目依赖版本：&#10;  - Java17 -&gt; 21 - Spring Boot 3.2.12 -&gt; 3.5.4&#10;  - Spring Cloud 2023.0.4 -&gt; 2025.0.0&#10;  - OpenTelemetry相关依赖移除">
+      <option name="closed" value="true" />
+      <created>1755590833242</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1755590833242</updated>
+    </task>
+    <task id="LOCAL-00026" summary="feat(cache): 实现 L1+Caffeine+L2+Redis 的两级缓存体系&#10;&#10;- 新增 xksms-starter-cache 模块，提供统一的缓存解决方案&#10;- 支持 L1 (Caffeine) 和 L2 (Redis) 两级缓存&#10;- 配置驱动，通过 application.yml 控制缓存行为&#10;-引入 xksms-starter-redis 作为底层支持&#10;-移除 xksms-starter-trace-reactor 模块">
+      <option name="closed" value="true" />
+      <created>1755854845300</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1755854845300</updated>
+    </task>
+    <task id="LOCAL-00027" summary="feat(redis): 重构 Starter 并添加 RedisHelper 高阶服务- 重新设计了 Redis 连接工厂和模板的创建方式- 新增 RedisHelper 类，提供类型安全、空值安全的 Redis 操作封装&#10;- 更新 README 文档，详细说明了新设计的使用方法和配置属性&#10;-优化了依赖，添加了 Apache Commons Pool2">
+      <option name="closed" value="true" />
+      <created>1756089708548</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1756089708548</updated>
+    </task>
+    <task id="LOCAL-00028" summary="feat(user): 添加缓存测试功能并优化 Tracing 配置- 更新 Tracing 配置，使用 gRPC 传输协议&#10;- 添加 CacheTestController 和 CacheTestService 用于测试缓存功能&#10;- 修改 Nacos、Prometheus等 Docker Compose 文件&#10;- 更新 MongoDB 相关配置&#10;-调整 Spring Boot 项目配置">
+      <option name="closed" value="true" />
+      <created>1756186714532</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1756186714532</updated>
+    </task>
+    <task id="LOCAL-00029" summary="build: 更新 SkyWalking 版本并配置 Zipkin&#10;&#10;- 更新 SkyWalking 版本至 10.0&#10;- 在 Docker Compose 文件中添加 Zipkin Query API端口映射&#10;- 修改应用配置文件，移除管理端点配置&#10;- 新增 Observability 配置文件，包含 Tracing 和 OTLP 配置&#10;- 更新 UI 容器环境变量，添加 Zipkin 地址">
+      <option name="closed" value="true" />
+      <created>1756189207887</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1756189207887</updated>
+    </task>
+    <task id="LOCAL-00030" summary="feat(cache): 启用缓存功能并优化日志级别&#10;&#10;- 在 CacheTestController 中添加日志记录，获取时间戳和调用耗时信息&#10;- 调整开发环境下的日志级别为 INFO&#10;- 在 XksmsCacheAutoConfiguration 中启用缓存功能- 在 XksmsUserApplication 中启用缓存功能">
+      <option name="closed" value="true" />
+      <created>1756190288569</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1756190288569</updated>
+    </task>
+    <task id="LOCAL-00031" summary="feat(starters): 新增全局异常处理和统一响应封装&#10;&#10;- 新增 BaseException 作为自定义业务异常的基类&#10;- 实现全局异常捕获和统一响应格式 (Result)&#10;- 添加参数校验异常处理&#10;- 新增远程调用错误解码器 (Feign)&#10;- 更新相关模块以集成新功能">
+      <option name="closed" value="true" />
+      <created>1756192660365</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1756192660365</updated>
+    </task>
+    <task id="LOCAL-00032" summary="feat(notify): 实现通知服务并优化用户服务&#10;&#10;- 新增通知服务模块，包括 API、业务逻辑和数据传输对象&#10;-重构用户服务模块，优化缓存测试和用户控制器&#10;- 更新网关配置，添加通知服务路由- 实现全局响应式异常处理器&#10;- 调整日志级别和格式">
+      <option name="closed" value="true" />
+      <created>1756362898310</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1756362898310</updated>
+    </task>
+    <task id="LOCAL-00033" summary="feat(auth): 添加统一认证授权中心模块&#10;&#10;- 新增 xksms-auth 模块，基于 Spring Authorization Server 实现 OAuth2 授权服务&#10;- 配置 AuthorizationServerConfig，支持 OIDC 和多种授权模式- 添加认证客户端配置，包括客户端ID、密钥、授权类型和回调地址&#10;- 实现 JWT 签名密钥对生成和 JWKSource 配置- 集成 Nacos 配置中心和日志系统&#10;- 创建 AuthApplication 启动类，启用 FeignClients 支持&#10;- 添加相关依赖，包括 spring-boot-starter-oauth2-authorization-server 和自定义 starters&#10;- 调整项目结构，将 xksms-user 模块从 xksms-modules 迁移至 xksms-platform&#10;- 新增 xksms-system 模块，包含系统管理的 API 和业务实现- 修复 FeignErrorDecoder 中 Result 对象字段访问方式&#10;-优化 GlobalResponseAdvice，支持对 null 响应和已封装 Result 对象的处理- 完善 observability-default.yml 配置，暴露 JMX 端点并显示详细信息">
+      <option name="closed" value="true" />
+      <created>1758683853796</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1758683853796</updated>
+    </task>
+    <task id="LOCAL-00034" summary="feat(auth): 初始化统一认证授权中心模块&#10;&#10;- 新增 README.md 文档，详细描述模块功能、结构与启动方式&#10;- 更新 application.yml 应用名称为 xksms-auth&#10;- 替换 Maven 依赖 spring-cloud-openfeign-core为 xksms-starter-rpc- 完善 RemoteUserDetailsService 实现，增强用户信息加载逻辑与异常处理&#10;-优化 SecurityConfig 配置，细化 CSRF 忽略路径与接口权限控制">
+      <option name="closed" value="true" />
+      <created>1760423224125</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1760423224125</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="feat(observability): 添加 Prometheus 和 Micrometer 集成&#10;&#10;- 实现了全局标签注册定制器，用于在 MeterRegistry 中添加通用标签&#10;- 添加了默认的 observability 配置文件，包含 Prometheus 和 Actuator 配置&#10;- 创建了自动配置类，用于自动配置 MeterRegistryCustomizer&#10;-定义了 ObservabilityProperties 类，用于配置全局标签&#10;- 更新了项目 pom.xml，添加了必要的依赖&#10;- 新增了 README.md，详细介绍了组件功能和使用方法" />
+    <MESSAGE value="feat(docker): 添加 Prometheus 和 Grafana 的 Docker Compose 配置&#10;&#10;- 新增 Prometheus 和 Grafana 的 Docker Compose 配置文件&#10;- 配置 Prometheus 抓取 xksms-metrics 数据- 设置 Grafana 环境变量和数据卷&#10;- 添加 Prometheus 配置文件，设置全局配置和抓取任务" />
+    <MESSAGE value="build(xksms-dependencies): 添加 Caffeine 本地缓存依赖&#10;&#10;- 在 properties 中添加 caffeine.version 属性，版本号为 3.1.8&#10;- 在 dependencyManagement 中添加 Caffeine 依赖，groupId 为 com.github.ben-manes.caffeine" />
+    <MESSAGE value="refactor(docker): 重构 Logstash 配置并简化 README 文档&#10;&#10;- 精简 Logstash 配置，移除了特定模块的日志处理逻辑&#10;-优化日志索引生成方式，使用 appName 动态生成索引前缀&#10;- 删除了 README 文档中的冗余内容，增加了目录结构的代码块" />
+    <MESSAGE value="feat(user): 添加观测性支持并更新 Prometheus 和 Grafana 版本&#10;&#10;- 在 application.yml 中添加观测性配置导入&#10;- 更新 Prometheus镜像版本至 3.4.2&#10;- 更新 Grafana 镜像版本至 12.0.2&#10;- 添加 xksms-starter-observability 依赖" />
+    <MESSAGE value="infrastructure(docker): 统一 Docker 服务网络并添加新组件&#10;&#10;- 将所有 Docker 服务的网络统一为 xksms-net&#10;- 添加 MySQL、Nacos、Redis 和 SkyWalking 组件的 Docker Compose 文件&#10;- 创建初始化网络的脚本 init-network.sh&#10;- 调整 Prometheus 和 Grafana 的网络配置&#10;- 更新 ELK Stack 组件的网络配置" />
+    <MESSAGE value="network(xksms-net): 设置为外部网络并统一配置&#10;&#10;-将 xksms-net 设置为外部网络，避免重复创建&#10;-统一网络配置格式，提高可读性&#10;- 调整 Nacos 配置，使用 root 用户连接 MySQL&#10;- 为 Prometheus 添加外部网络配置&#10;- 移除 Redis 配置中的版本号" />
+    <MESSAGE value="feat(xksms-user): 整合 Nacos 服务注册与发现&#10;&#10;- 引入 xksms-starter-nacos 依赖&#10;- 更新应用配置文件，支持 Nacos 配置&#10;- 添加 Nacos 服务注册和发现相关配置- 优化日志配置，支持多环境&#10;- 更新 Maven 构建配置，支持资源过滤" />
+    <MESSAGE value="feat(xksms-user): 整合 Nacos 服务注册与发现功能&#10;&#10;- 新增 xksms-starter-nacos 模块，提供开箱即用的 Nacos 集成&#10;- 更新 xksms-user-biz 模块，引入 Nacos 支持- 添加 Nacos 相关配置和自动配置类&#10;- 优化日志配置，支持多环境- 更新 README 文档，添加 Nacos 集成说明" />
+    <MESSAGE value="docs(xksms-starter-nacos): 重构 README 文档&#10;&#10;- 更新文档结构，增加设计哲学、功能特性等新章节&#10;-详细说明配置项，包括基础配置、服务发现配置和配置中心配置&#10;- 添加共享配置的高级用法示例&#10;- 更新版本兼容信息&#10;- 移除故障排除部分，减少文档冗余" />
+    <MESSAGE value="feat(gateway): 实现网关核心模块并添加可观测性支持&#10;&#10;- 新增 xksms-gateway-core 模块，实现动态路由、全局鉴权等功能&#10;- 添加自定义 Nacos 配置和日志配置&#10;- 实现了基于 Micrometer 的观测能力，包括请求日志和指标收集- 新增 TraceId 传播和 MDC 桥接功能，支持 SkyWalking 和 WebFlux- 重构了日志配置，采用 Logstash 编码器统一日志格式" />
+    <MESSAGE value="docs(XKSMS): 更新命名空间与属性治理规范并新增监控计划文档&#10;&#10;- 更新《XKSMS 命名空间与属性治理规范（草案）》&#10;  - 增加可观测性指标（Metrics）的命名规范 - 调整部分命名示例和格式&#10;  - 移除 JSON 字段命名规范和扩展建议等内容&#10;&#10;- 新增《XKSMS-Cloud Micrometer 自动化监控全能力落地计划》文档&#10;  - 制定 Micrometer 监控能力在 xksms-cloud 项目中的全面集成计划  - 包含 JVM、系统、Web、数据库、消息等多方面的监控任务&#10;  - 提出监控成果验收标准和核心监控指标字典的构建要求" />
+    <MESSAGE value="refactor(xksms): 移除 WebFlux 相关代码并调整日志记录方式&#10;&#10;- 删除了 WebFlux 相关的观测和过滤代码&#10;-移除了自定义的日志切面&#10;- 调整了日志记录依赖，使用 Spring Boot 默认的日志记录机制&#10;- 清理了不必要的依赖项" />
+    <MESSAGE value="feat(observability): 实现基于 Micrometer 和 OpenTelemetry 的链路追踪&#10;&#10;- 在 xksms-gateway 和 xksms-user模块中添加了 Tracing配置&#10;- 新增 MdcContextAutoConfiguration 和 MdcInjectingObservationHandler 以支持 MDC 日志&#10;- 更新依赖版本：  - micrometer.version: 1.1.3 -&gt; 1.14.5&#10;  - 新增 opentelemetry-bom 和 opentelemetry-exporter-otlp-http 依赖&#10;- 移除了 context" />
+    <MESSAGE value="feat(observability): 实现基于 Micrometer 和 OpenTelemetry 的链路追踪&#10;&#10;- 在 xksms-gateway 和 xksms-user模块中添加了 Tracing配置&#10;- 新增 MdcContextAutoConfiguration 和 MdcInjectingObservationHandler 以支持 MDC 日志&#10;- 更新依赖版本：  - micrometer.version: 1.1.3 -&gt; 1.14.5&#10;  - 新增 opentelemetry-bom 和 opentelemetry-exporter-otlp-http 依赖&#10;- 移除了 context-propagation 依赖&#10;- 新增 XKSMS-Cloud 可观测性开发规范文档" />
+    <MESSAGE value="feat(log): 重构日志系统并支持 Filebeat&#10;&#10;- 更新 Logback 配置，增加 JSON 日志输出到文件&#10;- 新增 Filebeat 配置文件，用于采集 JSON 日志&#10;- 修改 Logstash 配置，支持接收 Filebeat 传输的日志&#10;- 更新项目依赖版本：&#10;  - Java17 -&gt; 21 - Spring Boot 3.2.12 -&gt; 3.5.4&#10;  - Spring Cloud 2023.0.4 -&gt; 2025.0.0&#10;  - OpenTelemetry相关依赖移除" />
+    <MESSAGE value="feat(cache): 实现 L1+Caffeine+L2+Redis 的两级缓存体系&#10;&#10;- 新增 xksms-starter-cache 模块，提供统一的缓存解决方案&#10;- 支持 L1 (Caffeine) 和 L2 (Redis) 两级缓存&#10;- 配置驱动，通过 application.yml 控制缓存行为&#10;-引入 xksms-starter-redis 作为底层支持&#10;-移除 xksms-starter-trace-reactor 模块" />
+    <MESSAGE value="feat(redis): 重构 Starter 并添加 RedisHelper 高阶服务- 重新设计了 Redis 连接工厂和模板的创建方式- 新增 RedisHelper 类，提供类型安全、空值安全的 Redis 操作封装&#10;- 更新 README 文档，详细说明了新设计的使用方法和配置属性&#10;-优化了依赖，添加了 Apache Commons Pool2" />
+    <MESSAGE value="feat(user): 添加缓存测试功能并优化 Tracing 配置- 更新 Tracing 配置，使用 gRPC 传输协议&#10;- 添加 CacheTestController 和 CacheTestService 用于测试缓存功能&#10;- 修改 Nacos、Prometheus等 Docker Compose 文件&#10;- 更新 MongoDB 相关配置&#10;-调整 Spring Boot 项目配置" />
+    <MESSAGE value="build: 更新 SkyWalking 版本并配置 Zipkin&#10;&#10;- 更新 SkyWalking 版本至 10.0&#10;- 在 Docker Compose 文件中添加 Zipkin Query API端口映射&#10;- 修改应用配置文件，移除管理端点配置&#10;- 新增 Observability 配置文件，包含 Tracing 和 OTLP 配置&#10;- 更新 UI 容器环境变量，添加 Zipkin 地址" />
+    <MESSAGE value="feat(cache): 启用缓存功能并优化日志级别&#10;&#10;- 在 CacheTestController 中添加日志记录，获取时间戳和调用耗时信息&#10;- 调整开发环境下的日志级别为 INFO&#10;- 在 XksmsCacheAutoConfiguration 中启用缓存功能- 在 XksmsUserApplication 中启用缓存功能" />
+    <MESSAGE value="feat(starters): 新增全局异常处理和统一响应封装&#10;&#10;- 新增 BaseException 作为自定义业务异常的基类&#10;- 实现全局异常捕获和统一响应格式 (Result)&#10;- 添加参数校验异常处理&#10;- 新增远程调用错误解码器 (Feign)&#10;- 更新相关模块以集成新功能" />
+    <MESSAGE value="feat(notify): 实现通知服务并优化用户服务&#10;&#10;- 新增通知服务模块，包括 API、业务逻辑和数据传输对象&#10;-重构用户服务模块，优化缓存测试和用户控制器&#10;- 更新网关配置，添加通知服务路由- 实现全局响应式异常处理器&#10;- 调整日志级别和格式" />
+    <MESSAGE value="feat(auth): 添加统一认证授权中心模块&#10;&#10;- 新增 xksms-auth 模块，基于 Spring Authorization Server 实现 OAuth2 授权服务&#10;- 配置 AuthorizationServerConfig，支持 OIDC 和多种授权模式- 添加认证客户端配置，包括客户端ID、密钥、授权类型和回调地址&#10;- 实现 JWT 签名密钥对生成和 JWKSource 配置- 集成 Nacos 配置中心和日志系统&#10;- 创建 AuthApplication 启动类，启用 FeignClients 支持&#10;- 添加相关依赖，包括 spring-boot-starter-oauth2-authorization-server 和自定义 starters&#10;- 调整项目结构，将 xksms-user 模块从 xksms-modules 迁移至 xksms-platform&#10;- 新增 xksms-system 模块，包含系统管理的 API 和业务实现- 修复 FeignErrorDecoder 中 Result 对象字段访问方式&#10;-优化 GlobalResponseAdvice，支持对 null 响应和已封装 Result 对象的处理- 完善 observability-default.yml 配置，暴露 JMX 端点并显示详细信息" />
+    <MESSAGE value="feat(auth): 初始化统一认证授权中心模块&#10;&#10;- 新增 README.md 文档，详细描述模块功能、结构与启动方式&#10;- 更新 application.yml 应用名称为 xksms-auth&#10;- 替换 Maven 依赖 spring-cloud-openfeign-core为 xksms-starter-rpc- 完善 RemoteUserDetailsService 实现，增强用户信息加载逻辑与异常处理&#10;-优化 SecurityConfig 配置，细化 CSRF 忽略路径与接口权限控制" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(auth): 初始化统一认证授权中心模块&#10;&#10;- 新增 README.md 文档，详细描述模块功能、结构与启动方式&#10;- 更新 application.yml 应用名称为 xksms-auth&#10;- 替换 Maven 依赖 spring-cloud-openfeign-core为 xksms-starter-rpc- 完善 RemoteUserDetailsService 实现，增强用户信息加载逻辑与异常处理&#10;-优化 SecurityConfig 配置，细化 CSRF 忽略路径与接口权限控制" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/xksms-starters/src/main/java/cn/xksms/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/xksms-starters/xksms-starter-log/src/main/java/cn/xksms/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/xksms-gateway/src/main/java/com/xksms/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/xksms-gateway/xksms-gateway-core/src/main/java/com/xksms/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/spring-web/6.2.9/spring-web-6.2.9-sources.jar!/org/springframework/web/filter/DelegatingFilterProxy.java</url>
+          <line>230</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/spring-web/6.2.9/spring-web-6.2.9-sources.jar!/org/springframework/web/filter/DelegatingFilterProxy.java</url>
+          <line>361</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/../../Java/maven/repository/org/springframework/spring-web/6.2.9/spring-web-6.2.9-sources.jar!/org/springframework/web/filter/DelegatingFilterProxy.java</url>
+          <line>256</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/xksms-modules/xksms-user/xksms-user-biz/src/main/java/com/xksms/user/biz/TestController.java</url>
+          <line>24</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/xksms-platform/xksms-user/xksms-user-biz/src/main/java/com/xksms/user/biz/controller/UserController.java</url>
+          <line>51</line>
+          <properties class="com.xksms.user.biz.controller.UserController">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>

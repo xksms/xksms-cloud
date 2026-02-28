@@ -12,6 +12,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
@@ -28,8 +29,13 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 
+/**
+ * Redis 自动配置类
+ * 提供自定义的 RedisConnectionFactory、RedisTemplate、RedisHelper 等核心组件
+ */
 // 我们不再使用 BeanPostProcessor，而是自己完整地定义核心 Bean
 @AutoConfiguration(before = RedisAutoConfiguration.class)
+@ConditionalOnClass({LettuceConnectionFactory.class, RedisTemplate.class})
 @EnableConfigurationProperties(XksmsRedisProperties.class)
 @ConditionalOnProperty(prefix = "xksms.redis", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class XksmsRedisAutoConfiguration {

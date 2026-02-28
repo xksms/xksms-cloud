@@ -46,8 +46,6 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-log</artifactId>
-            <version>${revision}</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

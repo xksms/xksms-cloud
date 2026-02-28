@@ -23,7 +23,6 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-redis</artifactId>
-            <version>${revision}</version>
         </dependency>
 
         <dependency>

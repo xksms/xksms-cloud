@@ -10,16 +10,12 @@
     </parent>
 
     <artifactId>xksms-common</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <version>${revision}</version>
     <name>${project.artifactId}</name>
-    <description>提供系统内所有模块可复用的枚举、常量、工具类</description>
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <description>xksms-cloud 公共模块父 POM，包含核心工具类、枚举、常量等</description>
 
+    <modules>
+        <module>xksms-common-core</module>
+    </modules>
 </project>

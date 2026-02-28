@@ -1,0 +1,78 @@
+Index: xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ReactiveHttpServerRequestLoggingHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ReactiveHttpServerRequestLoggingHandler.java b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ReactiveHttpServerRequestLoggingHandler.java
+new file mode 100644
+--- /dev/null	(date 1754546199190)
++++ b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ReactiveHttpServerRequestLoggingHandler.java	(date 1754546199190)
+@@ -0,0 +1,67 @@
++package com.xksms.observability.observation;
++
++import io.micrometer.observation.Observation;
++import io.micrometer.observation.ObservationHandler;
++import lombok.extern.slf4j.Slf4j;
++import org.apache.skywalking.apm.toolkit.trace.TraceContext;
++import org.springframework.http.HttpStatus;
++import org.springframework.http.HttpStatusCode;
++import org.springframework.http.server.reactive.ServerHttpResponse;
++import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
++import java.util.concurrent.TimeUnit;
++
++@Slf4j
++public class ReactiveHttpServerRequestLoggingHandler implements ObservationHandler<ServerRequestObservationContext> {
++
++	@Override
++	public boolean supportsContext(Observation.Context context) {
++		return context instanceof ServerRequestObservationContext;
++	}
++
++	@Override
++	public void onStart(ServerRequestObservationContext context) {
++		String traceId = TraceContext.traceId(); // SkyWalking 提供
++		//放入Reactor Context
++		context.put("traceId", traceId);
++		//通过context 放入到所有线程的mdc中
++		context.put("tid", traceId);
++		//放入到MDC中
++		log.info("MDC traceId: {}", traceId);
++		context.put("startTimeNanos", System.nanoTime());
++		log.info("Request In [Reactive]: {} {}", context.getCarrier().getMethod(), context.getCarrier().getURI());
++	}
++
++	@Override
++	public void onError(ServerRequestObservationContext context) {
++		long durationMillis = calculateDuration(context);
++		log.error("Request Out [Reactive] with Error: Status [{}], Cost [{}ms], Error [{}]",
++				getReactiveStatusCode(context), durationMillis, context.getError().getMessage(), context.getError());
++	}
++
++	@Override
++	public void onStop(ServerRequestObservationContext context) {
++		if (context.getError() == null) {
++			long durationMillis = calculateDuration(context);
++			log.info("Request Out [Reactive]: Status [{}], Cost [{}ms]",
++					getReactiveStatusCode(context), durationMillis);
++		}
++	}
++
++	private long calculateDuration(ServerRequestObservationContext context) {
++		Long startTimeNanos = context.get("startTimeNanos");
++		return (startTimeNanos != null) ? TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTimeNanos) : 0L;
++	}
++
++	/**
++	 * 【关键修正】健壮地获取 Reactive 状态码。
++	 */
++	private int getReactiveStatusCode(ServerRequestObservationContext context) {
++		ServerHttpResponse response = context.getResponse();
++		if (response == null) {
++			return 0; // 状态未知
++		}
++		HttpStatusCode statusCode = response.getStatusCode();
++		// 如果 getStatusCode() 本身返回 null (理论上可能)，也返回 0
++		return (statusCode != null) ? statusCode.value() : 0;
++	}
++}
+\ No newline at end of file

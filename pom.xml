@@ -18,9 +18,12 @@
         <module>xksms-starters</module>
         <!-- 业务模块 -->
         <module>xksms-modules</module>
+        <!-- 网关 -->
         <module>xksms-gateway</module>
+        <!-- 认证授权中心 -->
         <module>xksms-auth</module>
-        <module>xksms-platform</module>
+        <!-- 平台核心服务 -->
+        <module>xksms-services</module>
     </modules>
 
     <properties>

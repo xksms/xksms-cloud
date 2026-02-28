@@ -20,31 +20,26 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-notify-api</artifactId>
-            <version>${revision}</version>
         </dependency>
 
 
         <dependency>
             <groupId>com.xksms</groupId>
-            <artifactId>xksms-common</artifactId>
-            <version>${revision}</version>
+            <artifactId>xksms-common-core</artifactId>
         </dependency>
 
 
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-nacos</artifactId>
-            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-webflux</artifactId>
-            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-log</artifactId>
-            <version>${revision}</version>
         </dependency>
 
         <dependency>
@@ -55,7 +50,6 @@
         <dependency>
             <groupId>com.xksms</groupId>
             <artifactId>xksms-starter-observability</artifactId>
-            <version>${revision}</version>
         </dependency>
     </dependencies>
 

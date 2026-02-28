@@ -1,0 +1,1397 @@
+Index: xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/DefaultServerRequestObservationConvention.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/DefaultServerRequestObservationConvention.java b/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/DefaultServerRequestObservationConvention.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/DefaultServerRequestObservationConvention.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,49 +0,0 @@
+-// 位置: xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/DefaultServerRequestObservationConvention.java
+-package com.xksms.webflux.observation;
+-
+-import io.micrometer.common.KeyValues;
+-import io.micrometer.observation.Observation;
+-import io.micrometer.observation.ObservationConvention;
+-import lombok.NonNull;
+-
+-import java.util.Objects;
+-
+-/**
+- * 默认的、用于服务器端HTTP请求的观测约定。
+- * 它定义了我们将如何从请求上下文中提取关键信息，并将其转化为标准化的标签（KeyValues），
+- * 以便 Metrics 和 Tracing 系统能够统一消费。
+- */
+-public class DefaultServerRequestObservationConvention implements ObservationConvention<ServerRequestObservationContext> {
+-
+-	private static final String OBSERVATION_NAME = "xksms.http.server.requests";
+-
+-	@Override
+-	public boolean supportsContext(@NonNull Observation.Context context) {
+-		return context instanceof ServerRequestObservationContext;
+-	}
+-
+-	@Override
+-	@NonNull
+-	public KeyValues getLowCardinalityKeyValues(ServerRequestObservationContext context) {
+-		// 低基数键值对，用于聚合指标（Metrics）
+-		return KeyValues.of(
+-				"http.method", context.getRequest().getMethod().name(),
+-				"http.status_code", String.valueOf(context.getStatusCode())
+-		);
+-	}
+-
+-	@Override
+-	@NonNull
+-	public KeyValues getHighCardinalityKeyValues(ServerRequestObservationContext context) {
+-		// 高基数键值对，用于链路追踪（Tracing）的详细信息
+-		return KeyValues.of(
+-				"http.uri", context.getRequest().getURI().getPath(),
+-				"client.ip", Objects.requireNonNull(context.getRequest().getRemoteAddress()).getAddress().getHostAddress()
+-		);
+-	}
+-
+-	@Override
+-	public String getName() {
+-		return OBSERVATION_NAME;
+-	}
+-}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/LoggingObservationHandler.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/LoggingObservationHandler.java b/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/LoggingObservationHandler.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/LoggingObservationHandler.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,85 +0,0 @@
+-// 位置: xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/LoggingObservationHandler.java
+-package com.xksms.webflux.observation;
+-
+-import io.micrometer.common.KeyValue;
+-import io.micrometer.observation.Observation;
+-import io.micrometer.observation.ObservationHandler;
+-import io.micrometer.tracing.Tracer;
+-import lombok.RequiredArgsConstructor;
+-import lombok.extern.slf4j.Slf4j;
+-
+-import java.util.Optional;
+-import java.util.concurrent.TimeUnit;
+-import java.util.stream.StreamSupport;
+-
+-/**
+- * 一个专门用于记录请求日志的 ObservationHandler。
+- * 它会“订阅” ServerRequestObservationContext 类型的观测事件，
+- * 并在事件的生命周期关键点（开始、结束、出错）打印结构化的日志。
+- * 这实现了“观测”与“日志记录”的完美职责分离。
+- */
+-@Slf4j
+-@RequiredArgsConstructor
+-public class LoggingObservationHandler implements ObservationHandler<ServerRequestObservationContext> {
+-
+-	private final Tracer tracer;
+-
+-	@Override
+-	public void onStart(ServerRequestObservationContext context) {
+-		// onStart 的职责变得非常纯粹：只记录开始时间，不做任何日志打印
+-		context.setStartTimeNanos(System.nanoTime());
+-	}
+-
+-	/**
+-	 * 【核心】当观测的作用域（Scope）被打开后，此方法被调用。
+-	 * 此时，负责追踪的 Handler 已经将 traceId 等信息放入了 MDC。
+-	 * 这是打印“请求开始”日志的最佳时机。
+-	 */
+-	@Override
+-	public void onScopeOpened(ServerRequestObservationContext context) {
+-		String clientIp = findKeyValue(context, "client.ip").orElse("N/A");
+-		log.info("Request In: {} {}, IP: {}",
+-				context.getRequest().getMethod(),
+-				context.getRequest().getURI(),
+-				clientIp);
+-	}
+-
+-	@Override
+-	public void onStop(ServerRequestObservationContext context) {
+-		// onStop 在作用域关闭（MDC被清理）之前被调用，所以此时 MDC 依然有效
+-		long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - context.getStartTimeNanos());
+-		log.info("Request Out: Status [{}], Cost [{}ms]",
+-				context.getStatusCode(),
+-				durationMillis);
+-	}
+-
+-	@Override
+-	public void onError(ServerRequestObservationContext context) {
+-		// onError 同样在作用域关闭前被调用
+-		long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - context.getStartTimeNanos());
+-		log.error("Request Out with Error: Status [{}], Cost [{}ms], Error [{}]",
+-				context.getStatusCode(),
+-				durationMillis,
+-				context.getError().getMessage(),
+-				context.getError());
+-	}
+-
+-
+-	/**
+-	 * 一个辅助方法，用于从 Observation.Context 中安全地查找指定 Key 的值。
+-	 * @param context 观测上下文
+-	 * @param key 要查找的键
+-	 * @return 包含值的 Optional，如果找不到则为空
+-	 */
+-	private Optional<String> findKeyValue(ServerRequestObservationContext context, String key) {
+-		return StreamSupport.stream(context.getHighCardinalityKeyValues().spliterator(), false)
+-				.filter(keyValue -> key.equals(keyValue.getKey()))
+-				.map(KeyValue::getValue)
+-				.findFirst();
+-	}
+-
+-	@Override
+-	public boolean supportsContext(Observation.Context context) {
+-		return context instanceof ServerRequestObservationContext;
+-	}
+-}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/MdcTraceSubscriber.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/MdcTraceSubscriber.java b/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/MdcTraceSubscriber.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/MdcTraceSubscriber.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,65 +0,0 @@
+-package com.xksms.trace.reactor;
+-
+-
+-import org.reactivestreams.Subscription;
+-import org.slf4j.MDC;
+-import reactor.core.CoreSubscriber;
+-import reactor.util.context.Context;
+-import reactor.util.context.ContextView;
+-
+-
+-public class MdcTraceSubscriber implements CoreSubscriber<Object> {
+-	// 与生产者约定好的 KEY
+-	private static final String TRACE_ID_KEY = "tid";
+-	private static final String IP_KEY = "ip";
+-
+-	private final CoreSubscriber<Object> actual;
+-
+-	public MdcTraceSubscriber(CoreSubscriber<Object> actual) {
+-		this.actual = actual;
+-	}
+-
+-	// 【核心改造】 onNext 和 onError 都调用同一个桥接方法
+-	@Override
+-	public void onNext(Object o) {
+-		this.bridgeContextToMdcAndRun(() -> actual.onNext(o));
+-	}
+-
+-	@Override
+-	public void onError(Throwable t) {
+-		this.bridgeContextToMdcAndRun(() -> actual.onError(t));
+-	}
+-
+-	/**
+-	 * 将 Reactor Context 的值桥接到 MDC，并执行核心逻辑，然后清理 MDC。
+-	 * @param runnable 核心逻辑 (onNext / onError)
+-	 */
+-	private void bridgeContextToMdcAndRun(Runnable runnable) {
+-		// 从下游订阅者获取当前的 Reactor Context
+-		ContextView context = actual.currentContext();
+-		String traceId = context.getOrDefault(TRACE_ID_KEY, "N/A");
+-		String ip = context.getOrDefault(IP_KEY, "N/A");
+-
+-		// 使用 try-with-resources 和 MDC.putCloseable 确保 MDC 被自动清理
+-		try (MDC.MDCCloseable tidMdc = MDC.putCloseable(TRACE_ID_KEY, traceId);
+-			 MDC.MDCCloseable ipMdc = MDC.putCloseable(IP_KEY, ip)) {
+-			runnable.run();
+-		}
+-	}
+-
+-	// onSubscribe, onComplete, currentContext 方法保持不变
+-	@Override
+-	public void onSubscribe(Subscription s) {
+-		actual.onSubscribe(s);
+-	}
+-
+-	@Override
+-	public void onComplete() {
+-		actual.onComplete();
+-	}
+-
+-	@Override
+-	public Context currentContext() {
+-		return actual.currentContext();
+-	}
+-}
+Index: xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/filter/ObservedWebfluxFilter.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/filter/ObservedWebfluxFilter.java b/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/filter/ObservedWebfluxFilter.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/filter/ObservedWebfluxFilter.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,47 +0,0 @@
+-// 位置: xksms-starter-webflux/src/main/java/com/xksms/webflux/filter/ObservedWebfluxFilter.java
+-package com.xksms.webflux.filter;
+-
+-import com.xksms.webflux.observation.DefaultServerRequestObservationConvention;
+-import com.xksms.webflux.observation.ServerRequestObservationContext;
+-import io.micrometer.observation.Observation;
+-import io.micrometer.observation.ObservationRegistry;
+-import lombok.RequiredArgsConstructor;
+-import org.springframework.core.Ordered;
+-import org.springframework.http.HttpStatusCode;
+-import org.springframework.web.server.ServerWebExchange;
+-import org.springframework.web.server.WebFilter;
+-import org.springframework.web.server.WebFilterChain;
+-import reactor.core.publisher.Mono;
+-
+-import java.util.Optional;
+-
+-@RequiredArgsConstructor
+-public class ObservedWebfluxFilter implements WebFilter, Ordered {
+-
+-	private final ObservationRegistry registry;
+-	private final DefaultServerRequestObservationConvention convention = new DefaultServerRequestObservationConvention();
+-
+-	@Override
+-	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+-		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange.getRequest());
+-
+-		return Mono.just(context)
+-				.flatMap(ctx -> Observation.createNotStarted(convention, () -> ctx, registry)
+-						.observe(() -> chain.filter(exchange)))
+-				.doOnSuccess(aVoid -> recordStatusCode(exchange, context))
+-				.doOnError(throwable -> recordStatusCode(exchange, context));
+-	}
+-
+-	private void recordStatusCode(ServerWebExchange exchange, ServerRequestObservationContext context) {
+-		Integer statusCode = Optional.ofNullable(exchange.getResponse().getStatusCode())
+-				.map(HttpStatusCode::value)
+-				.orElse(500);
+-		context.setStatusCode(statusCode);
+-	}
+-
+-	@Override
+-	public int getOrder() {
+-		// 确保这是最先执行的过滤器之一，以便包裹住所有后续操作
+-		return Ordered.HIGHEST_PRECEDENCE;
+-	}
+-}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-trace-reactor/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+===================================================================
+diff --git a/xksms-starters/xksms-starter-trace-reactor/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports b/xksms-starters/xksms-starter-trace-reactor/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-trace-reactor/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,1 +0,0 @@
+-com.xksms.trace.reactor.TraceIdMdcReactorAutoConfiguration
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-trace-reactor/pom.xml
+===================================================================
+diff --git a/xksms-starters/xksms-starter-trace-reactor/pom.xml b/xksms-starters/xksms-starter-trace-reactor/pom.xml
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-trace-reactor/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,56 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project xmlns="http://maven.apache.org/POM/4.0.0"
+-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+-    <modelVersion>4.0.0</modelVersion>
+-    <parent>
+-        <groupId>com.xksms</groupId>
+-        <artifactId>xksms-starters</artifactId>
+-        <version>${revision}</version>
+-    </parent>
+-
+-    <artifactId>xksms-starter-trace-reactor</artifactId>
+-    <packaging>jar</packaging>
+-    <name>${project.artifactId}</name>
+-    <description>
+-        用于解决在 WebFlux 环境中，SkyWalking traceId 无法自动注入日志 MDC 的问题。
+-    </description>
+-
+-    <dependencies>
+-
+-        <dependency>
+-            <groupId>org.apache.skywalking</groupId>
+-            <artifactId>apm-toolkit-logback-1.x</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.springframework.boot</groupId>
+-            <artifactId>spring-boot-autoconfigure</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.springframework</groupId>
+-            <artifactId>spring-context</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>io.projectreactor</groupId>
+-            <artifactId>reactor-core</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.apache.skywalking</groupId>
+-            <artifactId>apm-toolkit-trace</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.slf4j</groupId>
+-            <artifactId>slf4j-api</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>jakarta.annotation</groupId>
+-            <artifactId>jakarta.annotation-api</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.projectlombok</groupId>
+-            <artifactId>lombok</artifactId>
+-        </dependency>
+-    </dependencies>
+-
+-
+-</project>
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/config/ReactiveObservationAutoConfiguration.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/config/ReactiveObservationAutoConfiguration.java b/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/config/ReactiveObservationAutoConfiguration.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/config/ReactiveObservationAutoConfiguration.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,33 +0,0 @@
+-package com.xksms.webflux.config;// 位置: xksms-starter-webflux/src/main/java/com/xksms/webflux/config/ReactiveObservationAutoConfiguration.java
+-// ...
+-
+-import com.xksms.webflux.filter.ObservedWebfluxFilter;
+-import com.xksms.webflux.observation.LoggingObservationHandler;
+-import io.micrometer.observation.ObservationRegistry;
+-import io.micrometer.tracing.Tracer;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+-import org.springframework.context.annotation.Bean;
+-import org.springframework.context.annotation.Configuration;
+-
+-@Configuration
+-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+-//确保 Tracer Bean 存在时，才启用我们的日志 Handler
+-@ConditionalOnBean({ObservationRegistry.class, Tracer.class})
+-public class ReactiveObservationAutoConfiguration {
+-
+-	@Bean
+-	public ObservedWebfluxFilter observedWebfluxFilter(ObservationRegistry observationRegistry) {
+-		return new ObservedWebfluxFilter(observationRegistry);
+-	}
+-
+-	/**
+-	 * 【新增】将我们的日志处理器注册为一个 Bean。
+-	 * Spring Boot 的 ObservationAutoConfiguration 会自动发现所有 ObservationHandler 类型的 Bean，
+-	 * 并将它们添加到全局的 ObservationRegistry 中。
+-	 */
+-	@Bean
+-	public LoggingObservationHandler loggingObservationHandler(Tracer tracer) {
+-		return new LoggingObservationHandler(tracer);
+-	}
+-}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/ServerRequestObservationContext.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/ServerRequestObservationContext.java b/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/ServerRequestObservationContext.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-webflux/src/main/java/com/xksms/webflux/observation/ServerRequestObservationContext.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,24 +0,0 @@
+-package com.xksms.webflux.observation;
+-
+-import io.micrometer.observation.Observation;
+-import lombok.Getter;
+-import lombok.Setter;
+-import org.springframework.http.server.reactive.ServerHttpRequest;
+-
+-/**
+- * 通用的、用于服务器端HTTP请求的观测上下文。
+- * 它携带了在观测过程中需要用到的核心对象。
+- */
+-@Getter
+-@Setter
+-public class ServerRequestObservationContext extends Observation.Context {
+-	private final ServerHttpRequest request;
+-	private int statusCode;
+-
+-	//用于存放观测开始时的纳秒级时间戳
+-	private long startTimeNanos;
+-
+-	public ServerRequestObservationContext(ServerHttpRequest request) {
+-		this.request = request;
+-	}
+-}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcHookRegistrar.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcHookRegistrar.java b/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcHookRegistrar.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcHookRegistrar.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,31 +0,0 @@
+-package com.xksms.trace.reactor;
+-
+-import jakarta.annotation.PreDestroy;
+-import lombok.extern.slf4j.Slf4j;
+-import org.springframework.boot.context.event.ApplicationReadyEvent;
+-import org.springframework.context.ApplicationListener;
+-import org.springframework.stereotype.Component;
+-import reactor.core.publisher.Hooks;
+-import reactor.core.publisher.Operators;
+-
+-@Slf4j
+-@Component
+-public class TraceIdMdcHookRegistrar implements ApplicationListener<ApplicationReadyEvent> {
+-
+-	private static final String HOOK_KEY = "xksms-mdc-trace-hook";
+-
+-	@Override
+-	public void onApplicationEvent(ApplicationReadyEvent event) {
+-		Hooks.onEachOperator(HOOK_KEY, Operators.lift((scannable, subscriber) ->
+-				new MdcTraceSubscriber(subscriber)));
+-		log.info("注册 Reactor traceId → MDC Hook 完成");
+-	}
+-
+-	@PreDestroy
+-	public void cleanupHook() {
+-		Hooks.resetOnEachOperator(HOOK_KEY);
+-		log.info("[XKSMS] Reactor MDC traceId hook removed.");
+-	}
+-
+-
+-}
+Index: xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcReactorAutoConfiguration.java
+===================================================================
+diff --git a/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcReactorAutoConfiguration.java b/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcReactorAutoConfiguration.java
+deleted file mode 100644
+--- a/xksms-starters/xksms-starter-trace-reactor/src/main/java/com/xksms/trace/reactor/TraceIdMdcReactorAutoConfiguration.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ /dev/null	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
+@@ -1,12 +0,0 @@
+-package com.xksms.trace.reactor;
+-
+-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+-import org.springframework.context.annotation.Configuration;
+-import org.springframework.context.annotation.Import;
+-import reactor.core.publisher.Hooks;
+-
+-@Configuration
+-@ConditionalOnClass(Hooks.class)
+-@Import(TraceIdMdcHookRegistrar.class)
+-public class TraceIdMdcReactorAutoConfiguration {
+-}
+Index: xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/MdcTraceObservationHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/MdcTraceObservationHandler.java b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/MdcTraceObservationHandler.java
+new file mode 100644
+--- /dev/null	(date 1754546914925)
++++ b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/MdcTraceObservationHandler.java	(date 1754546914925)
+@@ -0,0 +1,40 @@
++package com.xksms.observability.observation;
++
++import io.micrometer.observation.Observation;
++import io.micrometer.observation.ObservationHandler;
++import org.apache.skywalking.apm.toolkit.trace.TraceContext;
++import org.slf4j.MDC;
++import org.springframework.core.Ordered;
++
++/**
++ * 将 traceId 注入 MDC，用于日志追踪
++ */
++public class MdcTraceObservationHandler implements ObservationHandler<Observation.Context>, Ordered {
++
++    private static final String TRACE_ID_KEY = "traceId";
++
++    @Override
++    public void onStart(Observation.Context context) {
++        // SkyWalking Agent 提供 traceId，若使用 OpenTelemetry 也可以通过 context 拿到
++        String traceId = TraceContext.traceId();
++
++        if (!traceId.isEmpty()) {
++            MDC.put(TRACE_ID_KEY, traceId);
++        }
++    }
++
++    @Override
++    public void onStop(Observation.Context context) {
++        MDC.remove(TRACE_ID_KEY);
++    }
++
++    @Override
++    public boolean supportsContext(Observation.Context context) {
++        return true; // 所有 Observation 都注入 traceId
++    }
++
++    @Override
++    public int getOrder() {
++        return LOWEST_PRECEDENCE; // 最后执行，确保已生成 trace
++    }
++}
+Index: xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/config/XksmsWebAutoConfiguration.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.xksms.web.config;\r\n\r\n\r\nimport com.xksms.log.properties.LogstashProperties;\r\nimport com.xksms.web.aspect.WebLogAspect;\r\nimport org.springframework.boot.autoconfigure.AutoConfiguration;\r\nimport org.springframework.boot.autoconfigure.condition.ConditionalOnClass;\r\nimport org.springframework.boot.context.properties.EnableConfigurationProperties;\r\nimport org.springframework.context.annotation.Bean;\r\n\r\n@AutoConfiguration\r\n@EnableConfigurationProperties(LogstashProperties.class)\r\npublic class XksmsWebAutoConfiguration {\r\n\r\n\r\n\t@Bean\r\n\t// 当业务项目引入了 aop starter 时，这个 Bean 才会生效\r\n\t@ConditionalOnClass(name = \"org.aspectj.lang.annotation.Aspect\")\r\n\tpublic WebLogAspect webLogAspect() {\r\n\t\treturn new WebLogAspect();\r\n\t}\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/config/XksmsWebAutoConfiguration.java b/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/config/XksmsWebAutoConfiguration.java
+--- a/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/config/XksmsWebAutoConfiguration.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/config/XksmsWebAutoConfiguration.java	(date 1754480880300)
+@@ -2,7 +2,7 @@
+ 
+ 
+ import com.xksms.log.properties.LogstashProperties;
+-import com.xksms.web.aspect.WebLogAspect;
++
+ import org.springframework.boot.autoconfigure.AutoConfiguration;
+ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+ import org.springframework.boot.context.properties.EnableConfigurationProperties;
+@@ -13,12 +13,12 @@
+ public class XksmsWebAutoConfiguration {
+ 
+ 
+-	@Bean
+-	// 当业务项目引入了 aop starter 时，这个 Bean 才会生效
+-	@ConditionalOnClass(name = "org.aspectj.lang.annotation.Aspect")
+-	public WebLogAspect webLogAspect() {
+-		return new WebLogAspect();
+-	}
+-
++//	@Bean
++//	// 当业务项目引入了 aop starter 时，这个 Bean 才会生效
++//	@ConditionalOnClass(name = "org.aspectj.lang.annotation.Aspect")
++//	public WebLogAspect webLogAspect() {
++//		return new WebLogAspect();
++//	}
++//
+ 
+ }
+Index: xksms-starters/xksms-starter-webflux/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>com.xksms.webflux.config.ReactiveObservationAutoConfiguration
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-webflux/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports b/xksms-starters/xksms-starter-webflux/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+--- a/xksms-starters/xksms-starter-webflux/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-webflux/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports	(date 1754481186061)
+@@ -1,1 +1,1 @@
+-com.xksms.webflux.config.ReactiveObservationAutoConfiguration
+\ No newline at end of file
++#com.xksms.webflux.config.ReactiveObservationAutoConfiguration
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ServletHttpServerRequestLoggingHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ServletHttpServerRequestLoggingHandler.java b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ServletHttpServerRequestLoggingHandler.java
+new file mode 100644
+--- /dev/null	(date 1754535153154)
++++ b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/observation/ServletHttpServerRequestLoggingHandler.java	(date 1754535153154)
+@@ -0,0 +1,63 @@
++package com.xksms.observability.observation;
++
++import io.micrometer.observation.Observation;
++import io.micrometer.observation.ObservationHandler;
++import jakarta.servlet.http.HttpServletResponse;
++import lombok.extern.slf4j.Slf4j;
++import org.apache.skywalking.apm.toolkit.trace.TraceContext;
++import org.slf4j.MDC;
++import org.springframework.http.server.observation.ServerRequestObservationContext;
++
++import java.util.concurrent.TimeUnit;
++
++@Slf4j
++public class ServletHttpServerRequestLoggingHandler implements ObservationHandler<ServerRequestObservationContext> {
++	@Override
++	public boolean supportsContext(Observation.Context context) {
++		return context instanceof ServerRequestObservationContext;
++	}
++
++	/**
++	 * 【关键修正】从 onStart 移动到 onScopeOpened。
++	 * 此时，MDC 已被 TracingObservationHandler 填充。
++	 */
++	@Override
++	public void onStart(ServerRequestObservationContext context) {
++		String traceId = TraceContext.traceId();
++		MDC.put("tid", traceId);
++		context.put("startTimeNanos", System.nanoTime());
++		context.put("traceId", traceId);
++		log.info("Request In [Servlet]: {} {}", context.getCarrier().getMethod(), context.getCarrier().getRequestURI());
++	}
++
++	@Override
++	public void onError(ServerRequestObservationContext context) {
++		long durationMillis = calculateDuration(context);
++		log.error("Request Out [Servlet] with Error: Status [{}], Cost [{}ms], Error [{}]",
++				getServletStatusCode(context), durationMillis, context.getError().getMessage(), context.getError());
++	}
++
++	/**
++	 * 【关键修正】onStop 依然是记录出参日志的最佳位置，因为它在 onScopeClosed 之前。
++	 * 之前的日志没有 traceId 很可能是因为时序的毫秒级竞争。
++	 * 但理论上 onStop 时 MDC 依然有效。
++	 */
++	@Override
++	public void onStop(ServerRequestObservationContext context) {
++		if (context.getError() == null) {
++			long durationMillis = calculateDuration(context);
++			log.info("Request Out [Servlet]: Status [{}], Cost [{}ms]",
++					getServletStatusCode(context), durationMillis);
++		}
++	}
++
++	private long calculateDuration(ServerRequestObservationContext context) {
++		Long startTimeNanos = context.get("startTimeNanos");
++		return (startTimeNanos != null) ? TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTimeNanos) : 0L;
++	}
++
++	private int getServletStatusCode(ServerRequestObservationContext context) {
++		HttpServletResponse response = context.getResponse();
++		return (response != null) ? response.getStatus() : 0;
++	}
++}
+\ No newline at end of file
+Index: xksms-gateway/xksms-gateway-core/src/main/java/com/xksms/gateway/core/filter/GlobalTraceContextFilter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.xksms.gateway.core.filter;\r\n\r\nimport com.xksms.common.constant.LogConstant;\r\nimport com.xksms.gateway.core.util.TraceHeaderUtil;\r\nimport org.apache.skywalking.apm.toolkit.trace.TraceContext;\r\nimport org.slf4j.MDC;\r\nimport org.springframework.cloud.gateway.filter.GatewayFilterChain;\r\nimport org.springframework.cloud.gateway.filter.GlobalFilter;\r\nimport org.springframework.core.Ordered;\r\nimport org.springframework.http.server.reactive.ServerHttpRequest;\r\nimport org.springframework.stereotype.Component;\r\nimport org.springframework.web.server.ServerWebExchange;\r\nimport reactor.core.publisher.Mono;\r\nimport reactor.core.publisher.Signal;\r\nimport reactor.util.context.ContextView;\r\n\r\nimport java.util.Objects;\r\nimport java.util.function.Consumer;\r\n\r\n@Component\r\npublic class GlobalTraceContextFilter implements GlobalFilter, Ordered {\r\n\r\n\t// 定义我们要在 Reactor Context 和 MDC 中使用的 KEY\r\n\tprivate static final String TRACE_ID_KEY = \"tid\";\r\n\tprivate static final String IP_KEY = \"ip\";\r\n\r\n\t@Override\r\n\tpublic Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {\r\n\t\t// 1. 在链路起点，捕获所有需要的上下文信息\r\n\t\t// 此时 TraceContext.traceId() 已可用，我们优先使用它，以保证与Agent的上下文一致\r\n\t\tString traceId = TraceContext.traceId();\r\n\t\t// 如果 Agent 因某种原因在 Filter 执行时还未准备好，我们依然从 Header 解析作为备用\r\n\t\tString ipAddress = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();\r\n\t\tString spanId = TraceHeaderUtil.generateSpanId();\r\n\t\tString traceParentHeader = TraceHeaderUtil.buildTraceParentHeader(traceId, spanId);\r\n\t\tServerHttpRequest modifiedRequest = exchange.getRequest().mutate()\r\n\t\t\t\t.header(LogConstant.TRACE_PARENT_HEADER, traceParentHeader)\r\n\t\t\t\t.header(LogConstant.REQUEST_ID_HEADER, traceId)\r\n\t\t\t\t.build();\r\n\t\tServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();\r\n\r\n\t\treturn chain.filter(modifiedExchange)\r\n\t\t\t\t.contextWrite(ctx -> ctx.put(TRACE_ID_KEY, traceId).put(IP_KEY, ipAddress))\r\n\t\t\t\t// 【优化】doOnEach 现在能处理所有情况\r\n\t\t\t\t.doOnEach(logOnEach())\r\n\t\t\t\t// 【优化】空的 doOnError 已不再需要，可以移除\r\n\t\t\t\t.doFinally(signalType -> MDC.clear());\r\n\t}\r\n\r\n\t/**\r\n\t * 辅助方法，用于创建 Signal 消费者，将 Reactor Context 的值桥接到 MDC。\r\n\t * 【已优化】现在可以同时处理成功（onNext）和失败（onError）信号。\r\n\t */\r\n\tprivate <T> Consumer<Signal<T>> logOnEach() {\r\n\t\treturn signal -> {\r\n\t\t\t// 【关键修正】当信号是 onNext 或 onError 时，都进行 MDC 注入\r\n\t\t\tif (signal.isOnNext() || signal.isOnError()) {\r\n\t\t\t\tContextView context = signal.getContextView();\r\n\t\t\t\tif (!context.isEmpty()) {\r\n\t\t\t\t\tcontext.<String>getOrEmpty(TRACE_ID_KEY).ifPresent(tid -> MDC.put(TRACE_ID_KEY, tid));\r\n\t\t\t\t\tcontext.<String>getOrEmpty(IP_KEY).ifPresent(ip -> MDC.put(IP_KEY, ip));\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t};\r\n\t}\r\n\r\n\t@Override\r\n\tpublic int getOrder() {\r\n\t\treturn Ordered.HIGHEST_PRECEDENCE;\r\n\t}\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-gateway/xksms-gateway-core/src/main/java/com/xksms/gateway/core/filter/GlobalTraceContextFilter.java b/xksms-gateway/xksms-gateway-core/src/main/java/com/xksms/gateway/core/filter/GlobalTraceContextFilter.java
+--- a/xksms-gateway/xksms-gateway-core/src/main/java/com/xksms/gateway/core/filter/GlobalTraceContextFilter.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-gateway/xksms-gateway-core/src/main/java/com/xksms/gateway/core/filter/GlobalTraceContextFilter.java	(date 1754480684680)
+@@ -1,71 +1,71 @@
+-package com.xksms.gateway.core.filter;
+-
+-import com.xksms.common.constant.LogConstant;
+-import com.xksms.gateway.core.util.TraceHeaderUtil;
+-import org.apache.skywalking.apm.toolkit.trace.TraceContext;
+-import org.slf4j.MDC;
+-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+-import org.springframework.cloud.gateway.filter.GlobalFilter;
+-import org.springframework.core.Ordered;
+-import org.springframework.http.server.reactive.ServerHttpRequest;
+-import org.springframework.stereotype.Component;
+-import org.springframework.web.server.ServerWebExchange;
+-import reactor.core.publisher.Mono;
+-import reactor.core.publisher.Signal;
+-import reactor.util.context.ContextView;
+-
+-import java.util.Objects;
+-import java.util.function.Consumer;
+-
+-@Component
+-public class GlobalTraceContextFilter implements GlobalFilter, Ordered {
+-
+-	// 定义我们要在 Reactor Context 和 MDC 中使用的 KEY
+-	private static final String TRACE_ID_KEY = "tid";
+-	private static final String IP_KEY = "ip";
+-
+-	@Override
+-	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+-		// 1. 在链路起点，捕获所有需要的上下文信息
+-		// 此时 TraceContext.traceId() 已可用，我们优先使用它，以保证与Agent的上下文一致
+-		String traceId = TraceContext.traceId();
+-		// 如果 Agent 因某种原因在 Filter 执行时还未准备好，我们依然从 Header 解析作为备用
+-		String ipAddress = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
+-		String spanId = TraceHeaderUtil.generateSpanId();
+-		String traceParentHeader = TraceHeaderUtil.buildTraceParentHeader(traceId, spanId);
+-		ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+-				.header(LogConstant.TRACE_PARENT_HEADER, traceParentHeader)
+-				.header(LogConstant.REQUEST_ID_HEADER, traceId)
+-				.build();
+-		ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
+-
+-		return chain.filter(modifiedExchange)
+-				.contextWrite(ctx -> ctx.put(TRACE_ID_KEY, traceId).put(IP_KEY, ipAddress))
+-				// 【优化】doOnEach 现在能处理所有情况
+-				.doOnEach(logOnEach())
+-				// 【优化】空的 doOnError 已不再需要，可以移除
+-				.doFinally(signalType -> MDC.clear());
+-	}
+-
+-	/**
+-	 * 辅助方法，用于创建 Signal 消费者，将 Reactor Context 的值桥接到 MDC。
+-	 * 【已优化】现在可以同时处理成功（onNext）和失败（onError）信号。
+-	 */
+-	private <T> Consumer<Signal<T>> logOnEach() {
+-		return signal -> {
+-			// 【关键修正】当信号是 onNext 或 onError 时，都进行 MDC 注入
+-			if (signal.isOnNext() || signal.isOnError()) {
+-				ContextView context = signal.getContextView();
+-				if (!context.isEmpty()) {
+-					context.<String>getOrEmpty(TRACE_ID_KEY).ifPresent(tid -> MDC.put(TRACE_ID_KEY, tid));
+-					context.<String>getOrEmpty(IP_KEY).ifPresent(ip -> MDC.put(IP_KEY, ip));
+-				}
+-			}
+-		};
+-	}
+-
+-	@Override
+-	public int getOrder() {
+-		return Ordered.HIGHEST_PRECEDENCE;
+-	}
+-}
+\ No newline at end of file
++//package com.xksms.gateway.core.filter;
++//
++//import com.xksms.common.constant.LogConstant;
++//import com.xksms.gateway.core.util.TraceHeaderUtil;
++//import org.apache.skywalking.apm.toolkit.trace.TraceContext;
++//import org.slf4j.MDC;
++//import org.springframework.cloud.gateway.filter.GatewayFilterChain;
++//import org.springframework.cloud.gateway.filter.GlobalFilter;
++//import org.springframework.core.Ordered;
++//import org.springframework.http.server.reactive.ServerHttpRequest;
++//import org.springframework.stereotype.Component;
++//import org.springframework.web.server.ServerWebExchange;
++//import reactor.core.publisher.Mono;
++//import reactor.core.publisher.Signal;
++//import reactor.util.context.ContextView;
++//
++//import java.util.Objects;
++//import java.util.function.Consumer;
++//
++//@Component
++//public class GlobalTraceContextFilter implements GlobalFilter, Ordered {
++//
++//	// 定义我们要在 Reactor Context 和 MDC 中使用的 KEY
++//	private static final String TRACE_ID_KEY = "tid";
++//	private static final String IP_KEY = "ip";
++//
++//	@Override
++//	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
++//		// 1. 在链路起点，捕获所有需要的上下文信息
++//		// 此时 TraceContext.traceId() 已可用，我们优先使用它，以保证与Agent的上下文一致
++//		String traceId = TraceContext.traceId();
++//		// 如果 Agent 因某种原因在 Filter 执行时还未准备好，我们依然从 Header 解析作为备用
++//		String ipAddress = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
++//		String spanId = TraceHeaderUtil.generateSpanId();
++//		String traceParentHeader = TraceHeaderUtil.buildTraceParentHeader(traceId, spanId);
++//		ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
++//				.header(LogConstant.TRACE_PARENT_HEADER, traceParentHeader)
++//				.header(LogConstant.REQUEST_ID_HEADER, traceId)
++//				.build();
++//		ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
++//
++//		return chain.filter(modifiedExchange)
++//				.contextWrite(ctx -> ctx.put(TRACE_ID_KEY, traceId).put(IP_KEY, ipAddress))
++//				// 【优化】doOnEach 现在能处理所有情况
++//				.doOnEach(logOnEach())
++//				// 【优化】空的 doOnError 已不再需要，可以移除
++//				.doFinally(signalType -> MDC.clear());
++//	}
++//
++//	/**
++//	 * 辅助方法，用于创建 Signal 消费者，将 Reactor Context 的值桥接到 MDC。
++//	 * 【已优化】现在可以同时处理成功（onNext）和失败（onError）信号。
++//	 */
++//	private <T> Consumer<Signal<T>> logOnEach() {
++//		return signal -> {
++//			// 【关键修正】当信号是 onNext 或 onError 时，都进行 MDC 注入
++//			if (signal.isOnNext() || signal.isOnError()) {
++//				ContextView context = signal.getContextView();
++//				if (!context.isEmpty()) {
++//					context.<String>getOrEmpty(TRACE_ID_KEY).ifPresent(tid -> MDC.put(TRACE_ID_KEY, tid));
++//					context.<String>getOrEmpty(IP_KEY).ifPresent(ip -> MDC.put(IP_KEY, ip));
++//				}
++//			}
++//		};
++//	}
++//
++//	@Override
++//	public int getOrder() {
++//		return Ordered.HIGHEST_PRECEDENCE;
++//	}
++//}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/aspect/WebLogAspect.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.xksms.web.aspect;\r\n\r\nimport com.fasterxml.jackson.databind.ObjectMapper;\r\nimport jakarta.servlet.http.HttpServletRequest;\r\nimport lombok.extern.slf4j.Slf4j;\r\nimport org.apache.skywalking.apm.toolkit.trace.TraceContext;\r\nimport org.aspectj.lang.ProceedingJoinPoint;\r\nimport org.aspectj.lang.annotation.Around;\r\nimport org.aspectj.lang.annotation.Aspect;\r\nimport org.aspectj.lang.annotation.Pointcut;\r\nimport org.slf4j.MDC;\r\nimport org.springframework.stereotype.Component;\r\nimport org.springframework.web.context.request.RequestAttributes;\r\nimport org.springframework.web.context.request.RequestContextHolder;\r\nimport org.springframework.web.context.request.ServletRequestAttributes;\r\n\r\n@Aspect\r\n@Component\r\n@Slf4j\r\npublic class WebLogAspect {\r\n\r\n\tprivate final ObjectMapper objectMapper = new ObjectMapper();\r\n\r\n\t// 定义我们要在 MDC 中使用的 KEY\r\n\tprivate static final String TRACE_ID_KEY = \"tid\";\r\n\tprivate static final String IP_KEY = \"ip\";\r\n\r\n\t@Pointcut(\"@within(org.springframework.web.bind.annotation.RestController)\")\r\n\tpublic void webLog() {\r\n\t}\r\n\r\n\t@Around(\"webLog()\")\r\n\tpublic Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {\r\n\t\tlong startTime = System.currentTimeMillis();\r\n\r\n\t\t// 1. 【核心改造】主动建立日志上下文\r\n\t\tRequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();\r\n\t\tif (requestAttributes instanceof ServletRequestAttributes) {\r\n\t\t\tHttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();\r\n\r\n\t\t\t// 主动从 SkyWalking API 获取 traceId，此时它应该已经可用了\r\n\t\t\t// 如果 Agent 还未创建，它会返回 \"N/A\"，我们依然记录\r\n\t\t\tString traceId = TraceContext.traceId();\r\n\t\t\tString clientIp = request.getRemoteAddr();\r\n\r\n\t\t\t// 手动将关键信息放入 MDC\r\n\t\t\tMDC.put(TRACE_ID_KEY, traceId);\r\n\t\t\tMDC.put(IP_KEY, clientIp);\r\n\t\t}\r\n\r\n\t\ttry {\r\n\t\t\t// 2. 打印请求日志（此时 MDC 中已有 tid 和 ip）\r\n\t\t\tif (requestAttributes != null) {\r\n\t\t\t\tHttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();\r\n\t\t\t\tlog.info(\"REQUEST  : {} {}\", request.getMethod(), request.getRequestURL().toString());\r\n\t\t\t\tlog.info(\"HANDLER  : {}.{}\", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());\r\n\t\t\t\tlog.info(\"ARGS     : {}\", objectMapper.writeValueAsString(joinPoint.getArgs()));\r\n\t\t\t}\r\n\r\n\t\t\t// 3. 执行目标方法\r\n\t\t\tObject result = joinPoint.proceed();\r\n\r\n\t\t\t// 4. 打印响应日志（此时 MDC 中同样有 tid 和 ip）\r\n\t\t\tif (requestAttributes != null) {\r\n\t\t\t\tlong timeCost = System.currentTimeMillis() - startTime;\r\n\t\t\t\tlog.info(\"RESPONSE : {}\", objectMapper.writeValueAsString(result));\r\n\t\t\t\tlog.info(\"TIME-COST: {} ms\", timeCost);\r\n\t\t\t}\r\n\t\t\treturn result;\r\n\r\n\t\t} finally {\r\n\t\t\t// 5. 【至关重要】在请求结束时，清理 MDC，防止内存泄漏\r\n\t\t\tMDC.clear();\r\n\t\t}\r\n\t}\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/aspect/WebLogAspect.java b/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/aspect/WebLogAspect.java
+--- a/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/aspect/WebLogAspect.java	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-web/src/main/java/com/xksms/web/aspect/WebLogAspect.java	(date 1754480608265)
+@@ -1,76 +1,76 @@
+-package com.xksms.web.aspect;
+-
+-import com.fasterxml.jackson.databind.ObjectMapper;
+-import jakarta.servlet.http.HttpServletRequest;
+-import lombok.extern.slf4j.Slf4j;
+-import org.apache.skywalking.apm.toolkit.trace.TraceContext;
+-import org.aspectj.lang.ProceedingJoinPoint;
+-import org.aspectj.lang.annotation.Around;
+-import org.aspectj.lang.annotation.Aspect;
+-import org.aspectj.lang.annotation.Pointcut;
+-import org.slf4j.MDC;
+-import org.springframework.stereotype.Component;
+-import org.springframework.web.context.request.RequestAttributes;
+-import org.springframework.web.context.request.RequestContextHolder;
+-import org.springframework.web.context.request.ServletRequestAttributes;
+-
+-@Aspect
+-@Component
+-@Slf4j
+-public class WebLogAspect {
+-
+-	private final ObjectMapper objectMapper = new ObjectMapper();
+-
+-	// 定义我们要在 MDC 中使用的 KEY
+-	private static final String TRACE_ID_KEY = "tid";
+-	private static final String IP_KEY = "ip";
+-
+-	@Pointcut("@within(org.springframework.web.bind.annotation.RestController)")
+-	public void webLog() {
+-	}
+-
+-	@Around("webLog()")
+-	public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
+-		long startTime = System.currentTimeMillis();
+-
+-		// 1. 【核心改造】主动建立日志上下文
+-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+-		if (requestAttributes instanceof ServletRequestAttributes) {
+-			HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+-
+-			// 主动从 SkyWalking API 获取 traceId，此时它应该已经可用了
+-			// 如果 Agent 还未创建，它会返回 "N/A"，我们依然记录
+-			String traceId = TraceContext.traceId();
+-			String clientIp = request.getRemoteAddr();
+-
+-			// 手动将关键信息放入 MDC
+-			MDC.put(TRACE_ID_KEY, traceId);
+-			MDC.put(IP_KEY, clientIp);
+-		}
+-
+-		try {
+-			// 2. 打印请求日志（此时 MDC 中已有 tid 和 ip）
+-			if (requestAttributes != null) {
+-				HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+-				log.info("REQUEST  : {} {}", request.getMethod(), request.getRequestURL().toString());
+-				log.info("HANDLER  : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
+-				log.info("ARGS     : {}", objectMapper.writeValueAsString(joinPoint.getArgs()));
+-			}
+-
+-			// 3. 执行目标方法
+-			Object result = joinPoint.proceed();
+-
+-			// 4. 打印响应日志（此时 MDC 中同样有 tid 和 ip）
+-			if (requestAttributes != null) {
+-				long timeCost = System.currentTimeMillis() - startTime;
+-				log.info("RESPONSE : {}", objectMapper.writeValueAsString(result));
+-				log.info("TIME-COST: {} ms", timeCost);
+-			}
+-			return result;
+-
+-		} finally {
+-			// 5. 【至关重要】在请求结束时，清理 MDC，防止内存泄漏
+-			MDC.clear();
+-		}
+-	}
+-}
+\ No newline at end of file
++//package com.xksms.web.aspect;
++//
++//import com.fasterxml.jackson.databind.ObjectMapper;
++//import jakarta.servlet.http.HttpServletRequest;
++//import lombok.extern.slf4j.Slf4j;
++//import org.apache.skywalking.apm.toolkit.trace.TraceContext;
++//import org.aspectj.lang.ProceedingJoinPoint;
++//import org.aspectj.lang.annotation.Around;
++//import org.aspectj.lang.annotation.Aspect;
++//import org.aspectj.lang.annotation.Pointcut;
++//import org.slf4j.MDC;
++//import org.springframework.stereotype.Component;
++//import org.springframework.web.context.request.RequestAttributes;
++//import org.springframework.web.context.request.RequestContextHolder;
++//import org.springframework.web.context.request.ServletRequestAttributes;
++//
++//@Aspect
++//@Component
++//@Slf4j
++//public class WebLogAspect {
++//
++//	private final ObjectMapper objectMapper = new ObjectMapper();
++//
++//	// 定义我们要在 MDC 中使用的 KEY
++//	private static final String TRACE_ID_KEY = "tid";
++//	private static final String IP_KEY = "ip";
++//
++//	@Pointcut("@within(org.springframework.web.bind.annotation.RestController)")
++//	public void webLog() {
++//	}
++//
++//	@Around("webLog()")
++//	public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
++//		long startTime = System.currentTimeMillis();
++//
++//		// 1. 【核心改造】主动建立日志上下文
++//		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
++//		if (requestAttributes instanceof ServletRequestAttributes) {
++//			HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
++//
++//			// 主动从 SkyWalking API 获取 traceId，此时它应该已经可用了
++//			// 如果 Agent 还未创建，它会返回 "N/A"，我们依然记录
++//			String traceId = TraceContext.traceId();
++//			String clientIp = request.getRemoteAddr();
++//
++//			// 手动将关键信息放入 MDC
++//			MDC.put(TRACE_ID_KEY, traceId);
++//			MDC.put(IP_KEY, clientIp);
++//		}
++//
++//		try {
++//			// 2. 打印请求日志（此时 MDC 中已有 tid 和 ip）
++//			if (requestAttributes != null) {
++//				HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
++//				log.info("REQUEST  : {} {}", request.getMethod(), request.getRequestURL().toString());
++//				log.info("HANDLER  : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
++//				log.info("ARGS     : {}", objectMapper.writeValueAsString(joinPoint.getArgs()));
++//			}
++//
++//			// 3. 执行目标方法
++//			Object result = joinPoint.proceed();
++//
++//			// 4. 打印响应日志（此时 MDC 中同样有 tid 和 ip）
++//			if (requestAttributes != null) {
++//				long timeCost = System.currentTimeMillis() - startTime;
++//				log.info("RESPONSE : {}", objectMapper.writeValueAsString(result));
++//				log.info("TIME-COST: {} ms", timeCost);
++//			}
++//			return result;
++//
++//		} finally {
++//			// 5. 【至关重要】在请求结束时，清理 MDC，防止内存泄漏
++//			MDC.clear();
++//		}
++//	}
++//}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-observability/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n    <parent>\r\n        <groupId>com.xksms</groupId>\r\n        <artifactId>xksms-starters</artifactId>\r\n        <version>${revision}</version>\r\n    </parent>\r\n\r\n    <artifactId>xksms-starter-observability</artifactId>\r\n\r\n    <packaging>jar</packaging>\r\n    <name>${project.artifactId}</name>\r\n    <description>\r\n        统一封装如下监控指标与链路追踪接入：\r\n\r\n        SkyWalking agent 自动上报；\r\n\r\n        Micrometer + Prometheus 指标暴露；\r\n\r\n        Prometheus + Grafana 配套 dashboards；\r\n\r\n        支持 actuator 暴露健康、info、metrics 等指标接口；\r\n\r\n        集成 Spring Boot Admin 可选支持。\r\n    </description>\r\n\r\n    <dependencies>\r\n\r\n        <dependency>\r\n            <groupId>io.micrometer</groupId>\r\n            <artifactId>micrometer-registry-prometheus</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter-actuator</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>ch.qos.logback</groupId>\r\n            <artifactId>logback-core</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>ch.qos.logback</groupId>\r\n            <artifactId>logback-classic</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>net.logstash.logback</groupId>\r\n            <artifactId>logstash-logback-encoder</artifactId>\r\n        </dependency>\r\n\r\n\r\n        <dependency>\r\n            <groupId>org.apache.skywalking</groupId>\r\n            <artifactId>apm-agent-core</artifactId>\r\n            <scope>provided</scope>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.apache.skywalking</groupId>\r\n            <artifactId>apm-toolkit-trace</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.apache.skywalking</groupId>\r\n            <artifactId>apm-toolkit-webflux</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-configuration-processor</artifactId>\r\n            <optional>true</optional>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-autoconfigure</artifactId>\r\n        </dependency>\r\n    </dependencies>\r\n</project>\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-observability/pom.xml b/xksms-starters/xksms-starter-observability/pom.xml
+--- a/xksms-starters/xksms-starter-observability/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-observability/pom.xml	(date 1754536701162)
+@@ -14,71 +14,74 @@
+     <packaging>jar</packaging>
+     <name>${project.artifactId}</name>
+     <description>
+-        统一封装如下监控指标与链路追踪接入：
+-
+-        SkyWalking agent 自动上报；
+-
+-        Micrometer + Prometheus 指标暴露；
+-
+-        Prometheus + Grafana 配套 dashboards；
+-
+-        支持 actuator 暴露健康、info、metrics 等指标接口；
+-
+-        集成 Spring Boot Admin 可选支持。
++        [新] xksms-cloud 统一可观测性 Starter。
++        基于 Micrometer Observation，提供统一的指标、链路、日志能力。
+     </description>
+ 
+     <dependencies>
+-
+         <dependency>
+-            <groupId>io.micrometer</groupId>
+-            <artifactId>micrometer-registry-prometheus</artifactId>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter-web</artifactId>
++            <optional>true</optional>
+         </dependency>
+ 
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+-            <artifactId>spring-boot-starter-actuator</artifactId>
++            <artifactId>spring-boot-starter-webflux</artifactId>
++            <optional>true</optional>
+         </dependency>
+-
+         <dependency>
+-            <groupId>ch.qos.logback</groupId>
+-            <artifactId>logback-core</artifactId>
++            <groupId>io.micrometer</groupId>
++            <artifactId>micrometer-observation</artifactId>
+         </dependency>
+ 
+         <dependency>
+-            <groupId>ch.qos.logback</groupId>
+-            <artifactId>logback-classic</artifactId>
++            <groupId>org.apache.skywalking</groupId>
++            <artifactId>apm-agent-core</artifactId>
+         </dependency>
+-
+         <dependency>
+-            <groupId>net.logstash.logback</groupId>
+-            <artifactId>logstash-logback-encoder</artifactId>
++            <groupId>io.micrometer</groupId>
++            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+         </dependency>
+-
+-
+         <dependency>
+-            <groupId>org.apache.skywalking</groupId>
+-            <artifactId>apm-agent-core</artifactId>
+-            <scope>provided</scope>
++            <groupId>io.zipkin.reporter2</groupId>
++            <artifactId>zipkin-reporter-brave</artifactId>
+         </dependency>
++
+         <dependency>
+             <groupId>org.apache.skywalking</groupId>
+             <artifactId>apm-toolkit-trace</artifactId>
+         </dependency>
+ 
++
+         <dependency>
+-            <groupId>org.apache.skywalking</groupId>
+-            <artifactId>apm-toolkit-webflux</artifactId>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter-actuator</artifactId>
++        </dependency>
++        <dependency>
++            <groupId>io.micrometer</groupId>
++            <artifactId>micrometer-registry-prometheus</artifactId>
++        </dependency>
++
++
++        <dependency>
++            <groupId>io.micrometer</groupId>
++            <artifactId>context-propagation</artifactId>
++        </dependency>
++
++        <dependency>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-autoconfigure</artifactId>
+         </dependency>
+-
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-configuration-processor</artifactId>
+             <optional>true</optional>
+         </dependency>
+-
+         <dependency>
+-            <groupId>org.springframework.boot</groupId>
+-            <artifactId>spring-boot-autoconfigure</artifactId>
++            <groupId>org.projectlombok</groupId>
++            <artifactId>lombok</artifactId>
++            <optional>true</optional>
+         </dependency>
+     </dependencies>
+ </project>
+Index: xksms-modules/xksms-user/xksms-user-biz/src/main/resources/application.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring:\r\n  application:\r\n    name: xksms-user\r\n  profiles:\r\n    active: @spring.profiles.active@\r\n  config:\r\n    import:\r\n      - optional:classpath:observability-default.yml\r\n\r\n# 根据环境选择不同的 logback 配置\r\nlogging:\r\n  config: classpath:logback-spring.xml\r\n\r\n# 通用配置（所有环境共享）\r\nserver:\r\n  servlet:\r\n    context-path: /\r\n  shutdown: graceful\r\n  port: 10000\r\n\r\n# 管理端点配置\r\nmanagement:\r\n  endpoints:\r\n    web:\r\n      exposure:\r\n        include: health,info,prometheus\r\n  endpoint:\r\n    health:\r\n      show-details: never\r\n\r\n# 环境特定配置（通过 Maven Profile 注入）\r\n\r\n\r\nlogstash:\r\n  host: 192.168.2.10\r\n  port: 5044\r\nxksms:\r\n  nacos:\r\n    server-addr: 192.168.2.10:8848\r\n    namespace: 56c8a55c-34c0-4ad5-8621-73c960de4a53\r\n    group: DEFAULT_GROUP\r\n    username: nacos\r\n    password: xksmsxksms\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-modules/xksms-user/xksms-user-biz/src/main/resources/application.yml b/xksms-modules/xksms-user/xksms-user-biz/src/main/resources/application.yml
+--- a/xksms-modules/xksms-user/xksms-user-biz/src/main/resources/application.yml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-modules/xksms-user/xksms-user-biz/src/main/resources/application.yml	(date 1754485146261)
+@@ -6,7 +6,7 @@
+   config:
+     import:
+       - optional:classpath:observability-default.yml
+-
++debug: true
+ # 根据环境选择不同的 logback 配置
+ logging:
+   config: classpath:logback-spring.xml
+Index: xksms-gateway/xksms-gateway-core/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n    <parent>\r\n        <groupId>com.xksms</groupId>\r\n        <artifactId>xksms-gateway</artifactId>\r\n        <version>${revision}</version>\r\n    </parent>\r\n\r\n    <artifactId>xksms-gateway-core</artifactId>\r\n    <packaging>jar</packaging>\r\n    <name>${project.artifactId}</name>\r\n    <description>\r\n        xksms-cloud 统一网关核心模块，负责动态路由、全局鉴权、统一异常处理等。\r\n    </description>\r\n\r\n    <dependencies>\r\n\r\n        <dependency>\r\n            <groupId>com.github.ben-manes.caffeine</groupId>\r\n            <artifactId>caffeine</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.cloud</groupId>\r\n            <artifactId>spring-cloud-starter-gateway</artifactId>\r\n        </dependency>\r\n\r\n        <!-- 自定义 Starters -->\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-nacos</artifactId>\r\n            <version>${revision}</version>\r\n            <exclusions>\r\n                <exclusion>\r\n                    <groupId>com.alibaba.nacos</groupId>\r\n                    <artifactId>nacos-logback-adapter-12</artifactId>\r\n                </exclusion>\r\n                <exclusion>\r\n                    <groupId>com.alibaba.nacos</groupId>\r\n                    <artifactId>logback-adapter</artifactId>\r\n                </exclusion>\r\n            </exclusions>\r\n        </dependency>\r\n        <!-- RPC 远程调用相关 -->\r\n        <dependency>\r\n            <groupId>org.springframework.cloud</groupId>\r\n            <artifactId>spring-cloud-starter-loadbalancer</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter-aop</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-log</artifactId>\r\n            <version>${revision}</version>\r\n            <exclusions>\r\n                <exclusion>\r\n                    <groupId>org.springframework.boot</groupId>\r\n                    <artifactId>spring-boot-starter-web</artifactId>\r\n                </exclusion>\r\n            </exclusions>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-observability</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-trace-reactor</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-webflux</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-common</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.projectlombok</groupId>\r\n            <artifactId>lombok</artifactId>\r\n            <optional>true</optional>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter</artifactId>\r\n        </dependency>\r\n\r\n\r\n    </dependencies>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-gateway/xksms-gateway-core/pom.xml b/xksms-gateway/xksms-gateway-core/pom.xml
+--- a/xksms-gateway/xksms-gateway-core/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-gateway/xksms-gateway-core/pom.xml	(date 1754465622992)
+@@ -70,11 +70,6 @@
+             <version>${revision}</version>
+         </dependency>
+ 
+-        <dependency>
+-            <groupId>com.xksms</groupId>
+-            <artifactId>xksms-starter-trace-reactor</artifactId>
+-            <version>${revision}</version>
+-        </dependency>
+         <dependency>
+             <groupId>com.xksms</groupId>
+             <artifactId>xksms-starter-webflux</artifactId>
+Index: xksms-starters/xksms-starter-web/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>com.xksms.web.config.XksmsWebAutoConfiguration
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-web/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports b/xksms-starters/xksms-starter-web/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+--- a/xksms-starters/xksms-starter-web/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-web/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports	(date 1754481186069)
+@@ -1,1 +1,1 @@
+-com.xksms.web.config.XksmsWebAutoConfiguration
+\ No newline at end of file
++#com.xksms.web.config.XksmsWebAutoConfiguration
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/config/HttpServerRequestLoggingAutoConfiguration.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/config/HttpServerRequestLoggingAutoConfiguration.java b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/config/HttpServerRequestLoggingAutoConfiguration.java
+new file mode 100644
+--- /dev/null	(date 1754485994793)
++++ b/xksms-starters/xksms-starter-observability/src/main/java/com/xksms/observability/config/HttpServerRequestLoggingAutoConfiguration.java	(date 1754485994793)
+@@ -0,0 +1,55 @@
++// 文件路径: xksms-starter-observability/src/main/java/com/xksms/observability/config/HttpServerRequestLoggingAutoConfiguration.java
++
++package com.xksms.observability.config;
++
++import com.xksms.observability.observation.ReactiveHttpServerRequestLoggingHandler;
++import com.xksms.observability.observation.ServletHttpServerRequestLoggingHandler;
++import io.micrometer.observation.ObservationRegistry;
++import org.springframework.boot.actuate.autoconfigure.observation.web.servlet.WebMvcObservationAutoConfiguration;
++import org.springframework.boot.autoconfigure.AutoConfiguration;
++import org.springframework.boot.autoconfigure.AutoConfigureAfter;
++import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
++import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
++import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
++import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++import org.springframework.core.annotation.Order;
++
++/**
++ * HTTP 请求日志处理器的自动配置。
++ * <p>
++ * 作用：
++ * 1. 当 classpath 中存在 ObservationRegistry 时，此配置生效。
++ * 2. 自动将我们的 HttpServerRequestLoggingHandler 注册为一个 Spring Bean。
++ * 3. Spring Boot 的 ObservationAutoConfiguration 会自动发现所有 ObservationHandler 类型的 Bean，
++ * 并将它们添加到全局的 ObservationRegistry 中。
++ */
++@AutoConfiguration
++@ConditionalOnBean(ObservationRegistry.class)
++@AutoConfigureAfter({ WebMvcObservationAutoConfiguration.class })
++public class HttpServerRequestLoggingAutoConfiguration {
++	// Slf4jMdcObservationHandler 的默认 Order 是 1000。
++	// 我们设置一个比它更小的值，来获得更高的执行优先级。
++	private static final int LOGGING_HANDLER_ORDER = 999;
++
++	@Configuration(proxyBeanMethods = false)
++	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
++	static class ServletLoggingConfiguration {
++		@Bean
++		@Order(LOGGING_HANDLER_ORDER)
++		public ServletHttpServerRequestLoggingHandler servletHttpServerRequestLoggingHandler() {
++			return new ServletHttpServerRequestLoggingHandler();
++		}
++	}
++
++	@Configuration(proxyBeanMethods = false)
++	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
++	static class ReactiveLoggingConfiguration {
++		@Bean
++		@Order(LOGGING_HANDLER_ORDER)
++		public ReactiveHttpServerRequestLoggingHandler reactiveHttpServerRequestLoggingHandler() {
++			return new ReactiveHttpServerRequestLoggingHandler();
++		}
++	}
++}
+\ No newline at end of file
+Index: xksms-starters/xksms-starter-observability/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>com.xksms.observability.config.ObservabilityPrometheusAutoConfig\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-observability/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports b/xksms-starters/xksms-starter-observability/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+--- a/xksms-starters/xksms-starter-observability/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-observability/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports	(date 1754474133621)
+@@ -1,1 +1,2 @@
+ com.xksms.observability.config.ObservabilityPrometheusAutoConfig
++com.xksms.observability.config.HttpServerRequestLoggingAutoConfiguration
+Index: xksms-starters/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n    <parent>\r\n        <groupId>com.xksms</groupId>\r\n        <artifactId>xksms-cloud</artifactId>\r\n        <version>${revision}</version>\r\n    </parent>\r\n\r\n    <artifactId>xksms-starters</artifactId>\r\n    <packaging>pom</packaging>\r\n    <description>\r\n        通用 starter 集合\r\n    </description>\r\n    <modules>\r\n        <module>xksms-starter-log</module>\r\n        <module>xksms-starter-security</module>\r\n        <module>xksms-starter-observability</module>\r\n        <module>xksms-starter-nacos</module>\r\n        <module>xksms-starter-web</module>\r\n        <module>xksms-starter-trace-reactor</module>\r\n        <module>xksms-starter-webflux</module>\r\n    </modules>\r\n\r\n\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/pom.xml b/xksms-starters/pom.xml
+--- a/xksms-starters/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/pom.xml	(date 1754465605933)
+@@ -20,7 +20,6 @@
+         <module>xksms-starter-observability</module>
+         <module>xksms-starter-nacos</module>
+         <module>xksms-starter-web</module>
+-        <module>xksms-starter-trace-reactor</module>
+         <module>xksms-starter-webflux</module>
+     </modules>
+ 
+Index: xksms-starters/xksms-starter-log/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n    <parent>\r\n        <groupId>com.xksms</groupId>\r\n        <artifactId>xksms-starters</artifactId>\r\n        <version>${revision}</version>\r\n    </parent>\r\n\r\n    <artifactId>xksms-starter-log</artifactId>\r\n    <packaging>jar</packaging>\r\n    <name>${project.artifactId}</name>\r\n    <description>统一日志规范、TraceId 注入、MDC配置、Logback 格式、日志输出控制\r\n    </description>\r\n\r\n    <dependencies>\r\n\r\n        <dependency>\r\n            <groupId>io.micrometer</groupId>\r\n            <artifactId>context-propagation</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>io.projectreactor</groupId>\r\n            <artifactId>reactor-core</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>jakarta.servlet</groupId>\r\n            <artifactId>jakarta.servlet-api</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-configuration-processor</artifactId>\r\n            <optional>true</optional>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-autoconfigure</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.projectlombok</groupId>\r\n            <artifactId>lombok</artifactId>\r\n            <scope>provided</scope>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.apache.skywalking</groupId>\r\n            <artifactId>apm-toolkit-logback-1.x</artifactId>\r\n        </dependency>\r\n\r\n\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-observability</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.springframework</groupId>\r\n            <artifactId>spring-context</artifactId>\r\n        </dependency>\r\n\r\n    </dependencies>\r\n\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-log/pom.xml b/xksms-starters/xksms-starter-log/pom.xml
+--- a/xksms-starters/xksms-starter-log/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-log/pom.xml	(date 1754487062912)
+@@ -54,6 +54,26 @@
+             <artifactId>apm-toolkit-logback-1.x</artifactId>
+         </dependency>
+ 
++        <dependency>
++            <groupId>ch.qos.logback</groupId>
++            <artifactId>logback-core</artifactId>
++        </dependency>
++
++        <dependency>
++            <groupId>ch.qos.logback</groupId>
++            <artifactId>logback-classic</artifactId>
++        </dependency>
++
++        <dependency>
++            <groupId>net.logstash.logback</groupId>
++            <artifactId>logstash-logback-encoder</artifactId>
++        </dependency>
++
++        <dependency>
++            <groupId>org.slf4j</groupId>
++            <artifactId>slf4j-api</artifactId>
++        </dependency>
++
+ 
+         <dependency>
+             <groupId>com.xksms</groupId>
+Index: xksms-dependencies/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n\r\n    <groupId>com.xksms</groupId>\r\n    <artifactId>xksms-dependencies</artifactId>\r\n    <version>1.0.0-SNAPSHOT</version>\r\n    <packaging>pom</packaging>\r\n    <name>${project.artifactId}</name>\r\n    <description>xksms-cloud的依赖版本管理</description>\r\n\r\n    <properties>\r\n        <java.version>17</java.version>\r\n        <spring-boot.version>3.2.12</spring-boot.version>\r\n        <spring.cloud.version>2023.0.4</spring.cloud.version>\r\n        <spring.cloud.alibaba.version>2023.0.3.3</spring.cloud.alibaba.version>\r\n\r\n        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>\r\n        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>\r\n        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>\r\n\r\n        <!-- 第三方组件版本 -->\r\n        <lombok.version>1.18.34</lombok.version>\r\n        <java-jwt.version>4.4.0</java-jwt.version>\r\n        <sentinel.version>1.8.6</sentinel.version>\r\n        <apm-agent-core.version>9.4.0</apm-agent-core.version>\r\n        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>\r\n        <caffeine.version>3.1.8</caffeine.version>\r\n        <micrometer.version>1.1.3</micrometer.version>\r\n    </properties>\r\n\r\n    <dependencyManagement>\r\n        <dependencies>\r\n\r\n            <!-- Caffeine 本地缓存 -->\r\n            <dependency>\r\n                <groupId>com.github.ben-manes.caffeine</groupId>\r\n                <artifactId>caffeine</artifactId>\r\n                <version>${caffeine.version}</version>\r\n            </dependency>\r\n\r\n            <!-- Spring 依赖导入 -->\r\n            <dependency>\r\n                <groupId>org.springframework.boot</groupId>\r\n                <artifactId>spring-boot-dependencies</artifactId>\r\n                <version>${spring-boot.version}</version>\r\n                <type>pom</type>\r\n                <scope>import</scope>\r\n            </dependency>\r\n\r\n            <dependency>\r\n                <groupId>io.micrometer</groupId>\r\n                <artifactId>context-propagation</artifactId>\r\n                <version>${micrometer.version}</version>\r\n            </dependency>\r\n\r\n            <dependency>\r\n                <groupId>org.springframework.cloud</groupId>\r\n                <artifactId>spring-cloud-dependencies</artifactId>\r\n                <version>${spring.cloud.version}</version>\r\n                <type>pom</type>\r\n                <scope>import</scope>\r\n            </dependency>\r\n\r\n            <dependency>\r\n                <groupId>com.alibaba.cloud</groupId>\r\n                <artifactId>spring-cloud-alibaba-dependencies</artifactId>\r\n                <version>${spring.cloud.alibaba.version}</version>\r\n                <type>pom</type>\r\n                <scope>import</scope>\r\n            </dependency>\r\n\r\n            <!-- SkyWalking -->\r\n            <dependency>\r\n                <groupId>org.apache.skywalking</groupId>\r\n                <artifactId>apm-agent-core</artifactId>\r\n                <version>${apm-agent-core.version}</version>\r\n            </dependency>\r\n            <dependency>\r\n                <groupId>org.apache.skywalking</groupId>\r\n                <artifactId>apm-toolkit-trace</artifactId>\r\n                <version>${apm-agent-core.version}</version>\r\n            </dependency>\r\n\r\n            <dependency>\r\n                <groupId>org.apache.skywalking</groupId>\r\n                <artifactId>apm-toolkit-webflux</artifactId>\r\n                <version>${apm-agent-core.version}</version>\r\n            </dependency>\r\n\r\n            <!-- Sentinel -->\r\n            <dependency>\r\n                <groupId>com.alibaba.csp</groupId>\r\n                <artifactId>sentinel-core</artifactId>\r\n                <version>${sentinel.version}</version>\r\n            </dependency>\r\n\r\n            <!-- 日志增强 -->\r\n            <dependency>\r\n                <groupId>net.logstash.logback</groupId>\r\n                <artifactId>logstash-logback-encoder</artifactId>\r\n                <version>${logstash-logback-encoder.version}</version>\r\n            </dependency>\r\n\r\n            <dependency>\r\n                <groupId>org.apache.skywalking</groupId>\r\n                <artifactId>apm-toolkit-logback-1.x</artifactId>\r\n                <version>${apm-agent-core.version}</version>\r\n            </dependency>\r\n\r\n\r\n            <!-- JWT -->\r\n            <dependency>\r\n                <groupId>com.auth0</groupId>\r\n                <artifactId>java-jwt</artifactId>\r\n                <version>${java-jwt.version}</version>\r\n            </dependency>\r\n\r\n            <!-- Lombok -->\r\n            <dependency>\r\n                <groupId>org.projectlombok</groupId>\r\n                <artifactId>lombok</artifactId>\r\n                <version>${lombok.version}</version>\r\n            </dependency>\r\n\r\n            <!-- Spring 配置生成器 -->\r\n            <dependency>\r\n                <groupId>org.springframework.boot</groupId>\r\n                <artifactId>spring-boot-configuration-processor</artifactId>\r\n                <version>${spring-boot.version}</version>\r\n                <optional>true</optional>\r\n            </dependency>\r\n\r\n        </dependencies>\r\n    </dependencyManagement>\r\n\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-dependencies/pom.xml b/xksms-dependencies/pom.xml
+--- a/xksms-dependencies/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-dependencies/pom.xml	(date 1754536701171)
+@@ -83,6 +83,17 @@
+                 <artifactId>apm-toolkit-trace</artifactId>
+                 <version>${apm-agent-core.version}</version>
+             </dependency>
++            <dependency>
++                <groupId>org.apache.skywalking</groupId>
++                <artifactId>apm-toolkit-micrometer-1.10</artifactId>
++                <version>${apm-agent-core.version}</version>
++            </dependency>
++
++            <dependency>
++                <groupId>org.apache.skywalking</groupId>
++                <artifactId>apm-toolkit-micrometer-registry</artifactId>
++                <version>${apm-agent-core.version}</version>
++            </dependency>
+ 
+             <dependency>
+                 <groupId>org.apache.skywalking</groupId>
+Index: xksms-starters/xksms-starter-webflux/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n    <parent>\r\n        <groupId>com.xksms</groupId>\r\n        <artifactId>xksms-starters</artifactId>\r\n        <version>${revision}</version>\r\n    </parent>\r\n\r\n    <artifactId>xksms-starter-webflux</artifactId>\r\n    <packaging>jar</packaging>\r\n    <name>${project.artifactId}</name>\r\n    <description>\r\n        xksms-cloud 响应式Web领域Starter，为WebFlux应用（如网关）提供统一的请求日志、链路上下文治理等能力。\r\n    </description>\r\n\r\n    <dependencies>\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter-webflux</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>io.micrometer</groupId>\r\n            <artifactId>micrometer-observation</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>io.micrometer</groupId>\r\n            <artifactId>micrometer-tracing</artifactId>\r\n        </dependency>\r\n\r\n\r\n        <dependency>\r\n            <groupId>org.apache.skywalking</groupId>\r\n            <artifactId>apm-toolkit-logback-1.x</artifactId>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.projectlombok</groupId>\r\n            <artifactId>lombok</artifactId>\r\n            <scope>provided</scope>\r\n        </dependency>\r\n\r\n    </dependencies>\r\n\r\n\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-webflux/pom.xml b/xksms-starters/xksms-starter-webflux/pom.xml
+--- a/xksms-starters/xksms-starter-webflux/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-webflux/pom.xml	(date 1754480376731)
+@@ -17,25 +17,12 @@
+     </description>
+ 
+     <dependencies>
++
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-webflux</artifactId>
+         </dependency>
+ 
+-        <dependency>
+-            <groupId>io.micrometer</groupId>
+-            <artifactId>micrometer-observation</artifactId>
+-        </dependency>
+-        <dependency>
+-            <groupId>io.micrometer</groupId>
+-            <artifactId>micrometer-tracing</artifactId>
+-        </dependency>
+-
+-
+-        <dependency>
+-            <groupId>org.apache.skywalking</groupId>
+-            <artifactId>apm-toolkit-logback-1.x</artifactId>
+-        </dependency>
+         <dependency>
+             <groupId>org.projectlombok</groupId>
+             <artifactId>lombok</artifactId>
+Index: xksms-starters/xksms-starter-web/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n    <parent>\r\n        <groupId>com.xksms</groupId>\r\n        <artifactId>xksms-starters</artifactId>\r\n        <version>${revision}</version>\r\n    </parent>\r\n\r\n    <artifactId>xksms-starter-web</artifactId>\r\n    <packaging>jar</packaging>\r\n    <name>${project.artifactId}</name>\r\n    <description>\r\n        xksms-cloud Web 领域 Starter，提供统一的Web请求日志、全局异常处理、统一响应封装等Web治理能力。\r\n    </description>\r\n\r\n    <dependencies>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework</groupId>\r\n            <artifactId>spring-context</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter-web</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter-aop</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter-validation</artifactId>\r\n        </dependency>\r\n\r\n\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-configuration-processor</artifactId>\r\n            <optional>true</optional>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-common</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-log</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>com.xksms</groupId>\r\n            <artifactId>xksms-starter-webflux</artifactId>\r\n            <version>${revision}</version>\r\n        </dependency>\r\n\r\n\r\n        <dependency>\r\n            <groupId>org.projectlombok</groupId>\r\n            <artifactId>lombok</artifactId>\r\n            <optional>true</optional>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.aspectj</groupId>\r\n            <artifactId>aspectjweaver</artifactId>\r\n        </dependency>\r\n\r\n\r\n    </dependencies>\r\n\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-web/pom.xml b/xksms-starters/xksms-starter-web/pom.xml
+--- a/xksms-starters/xksms-starter-web/pom.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-web/pom.xml	(date 1754480412215)
+@@ -57,12 +57,6 @@
+             <version>${revision}</version>
+         </dependency>
+ 
+-        <dependency>
+-            <groupId>com.xksms</groupId>
+-            <artifactId>xksms-starter-webflux</artifactId>
+-            <version>${revision}</version>
+-        </dependency>
+-
+ 
+         <dependency>
+             <groupId>org.projectlombok</groupId>
+Index: xksms-starters/xksms-starter-log/src/main/resources/logback-spring.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><configuration>\r\n    <springProperty scope=\"context\" name=\"logstashHost\" source=\"logstash.host\" defaultValue=\"localhost\"/>\r\n    <springProperty scope=\"context\" name=\"logstashPort\" source=\"logstash.port\" defaultValue=\"4560\"/>\r\n    <contextName>${spring.application.name:-xksms-app}</contextName>\r\n\r\n    <!-- 公共转换规则 -->\r\n    <conversionRule conversionWord=\"ip\" converterClass=\"com.xksms.log.config.IpConfig\"/>\r\n    <conversionRule conversionWord=\"tid\" converterClass=\"org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternConverter\"/>\r\n\r\n    <!-- 控制台输出（开发使用） -->\r\n    <appender name=\"STDOUT\" class=\"ch.qos.logback.core.ConsoleAppender\">\r\n        <encoder class=\"net.logstash.logback.encoder.LogstashEncoder\">\r\n            <jsonGeneratorDecorator class=\"net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator\"/>\r\n            <timestamp>\r\n                <fieldName>timestamp</fieldName>\r\n                <timeZone>UTC</timeZone>\r\n            </timestamp>\r\n            <contextName>\r\n                <fieldName>app_name</fieldName>\r\n            </contextName>\r\n            <logLevel>\r\n                <fieldName>level</fieldName>\r\n            </logLevel>\r\n            <mdc>\r\n                <includeMdcKeyName>tid</includeMdcKeyName>\r\n            </mdc>\r\n            <pattern>\r\n                <omitEmptyFields>true</omitEmptyFields>\r\n                <pattern>{\"ip\": \"%ip\"}</pattern>\r\n            </pattern>\r\n            <threadName>\r\n                <fieldName>thread</fieldName>\r\n            </threadName>\r\n            <loggerName>\r\n                <fieldName>logger</fieldName>\r\n            </loggerName>\r\n            <message/>\r\n            <stackTrace>\r\n                <fieldName>stack_trace</fieldName>\r\n            </stackTrace>\r\n\r\n        </encoder>\r\n    </appender>\r\n\r\n    <!-- Logstash 输出（生产使用） -->\r\n    <appender name=\"LOGSTASH\" class=\"net.logstash.logback.appender.LogstashTcpSocketAppender\">\r\n        <destination>${logstashHost}:${logstashPort}</destination>\r\n        <keepAliveDuration>5 minutes</keepAliveDuration>\r\n        <reconnectionDelay>3 seconds</reconnectionDelay>\r\n        <encoder class=\"net.logstash.logback.encoder.LogstashEncoder\">\r\n            <timestamp>\r\n                <fieldName>timestamp</fieldName>\r\n                <timeZone>UTC</timeZone>\r\n            </timestamp>\r\n            <contextName>\r\n                <fieldName>app_name</fieldName>\r\n            </contextName>\r\n            <logLevel>\r\n                <fieldName>level</fieldName>\r\n            </logLevel>\r\n            <mdc>\r\n                <includeMdcKeyName>tid</includeMdcKeyName>\r\n            </mdc>\r\n            <pattern>\r\n                <omitEmptyFields>true</omitEmptyFields>\r\n                <pattern>{\"ip\": \"%ip\"}</pattern>\r\n            </pattern>\r\n            <threadName>\r\n                <fieldName>thread</fieldName>\r\n            </threadName>\r\n            <loggerName>\r\n                <fieldName>logger</fieldName>\r\n            </loggerName>\r\n            <message/>\r\n            <stackTrace>\r\n                <fieldName>stack_trace</fieldName>\r\n            </stackTrace>\r\n\r\n        </encoder>\r\n    </appender>\r\n\r\n    <!--    <root level=\"INFO\">-->\r\n    <!--        <appender-ref ref=\"STDOUT\"/>-->\r\n    <!--    </root>-->\r\n\r\n\r\n    <!-- 开发环境日志配置 -->\r\n    <springProfile name=\"dev\">\r\n        <root level=\"DEBUG\">\r\n            <appender-ref ref=\"STDOUT\"/>\r\n            <appender-ref ref=\"LOGSTASH\"/>\r\n        </root>\r\n        <logger name=\"com.xksms\" level=\"DEBUG\"/>\r\n\r\n        <logger name=\"org.springframework\" level=\"INFO\"/>\r\n        <logger name=\"org.apache.ibatis\" level=\"DEBUG\"/>\r\n\r\n        <logger name=\"com.alibaba.nacos\" level=\"INFO\"/>\r\n        <logger name=\"com.alibaba.cloud.nacos\" level=\"INFO\"/>\r\n\r\n        <logger name=\"io.netty\" level=\"INFO\"/>\r\n        <logger name=\"reactor.netty\" level=\"INFO\"/>\r\n\r\n        <logger name=\"org.springframework.cloud.gateway\" level=\"DEBUG\"/>\r\n    </springProfile>\r\n\r\n    <!-- 测试环境日志配置 -->\r\n    <springProfile name=\"test\">\r\n        <root level=\"INFO\">\r\n            <appender-ref ref=\"STDOUT\"/>\r\n            <appender-ref ref=\"LOGSTASH\"/>\r\n        </root>\r\n        <logger name=\"com.xksms\" level=\"INFO\"/>\r\n        <logger name=\"org.springframework\" level=\"INFO\"/>\r\n        <logger name=\"org.apache.ibatis\" level=\"INFO\"/>\r\n\r\n        <logger name=\"com.alibaba.nacos\" level=\"INFO\"/>\r\n        <logger name=\"com.alibaba.cloud.nacos\" level=\"INFO\"/>\r\n\r\n        <logger name=\"io.netty\" level=\"INFO\"/>\r\n        <logger name=\"reactor.netty\" level=\"INFO\"/>\r\n    </springProfile>\r\n\r\n    <!-- 生产环境日志配置 -->\r\n    <springProfile name=\"prod\">\r\n        <root level=\"INFO\">\r\n            <appender-ref ref=\"LOGSTASH\"/>\r\n        </root>\r\n\r\n        <logger name=\"com.xksms\" level=\"INFO\"/>\r\n        <logger name=\"org.springframework\" level=\"WARN\"/>\r\n        <logger name=\"org.apache.ibatis\" level=\"WARN\"/>\r\n\r\n        <logger name=\"com.alibaba.nacos\" level=\"WARN\"/>\r\n        <logger name=\"com.alibaba.cloud.nacos\" level=\"WARN\"/>\r\n\r\n        <logger name=\"io.netty\" level=\"WARN\"/>\r\n        <logger name=\"reactor.netty\" level=\"WARN\"/>\r\n    </springProfile>\r\n\r\n</configuration>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/xksms-starters/xksms-starter-log/src/main/resources/logback-spring.xml b/xksms-starters/xksms-starter-log/src/main/resources/logback-spring.xml
+--- a/xksms-starters/xksms-starter-log/src/main/resources/logback-spring.xml	(revision 8fc7f072a1ecda5053d30161e43fcb9903e5f9a3)
++++ b/xksms-starters/xksms-starter-log/src/main/resources/logback-spring.xml	(date 1754535207210)
+@@ -25,8 +25,9 @@
+                 <includeMdcKeyName>tid</includeMdcKeyName>
+             </mdc>
+             <pattern>
+-                <omitEmptyFields>true</omitEmptyFields>
+-                <pattern>{"ip": "%ip"}</pattern>
++<!--                <omitEmptyFields>true</omitEmptyFields>-->
++<!--                <pattern>{"ip": "%ip"}</pattern>-->
++                <fieldName>ip</fieldName>
+             </pattern>
+             <threadName>
+                 <fieldName>thread</fieldName>

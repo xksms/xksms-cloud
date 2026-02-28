@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.xksms</groupId>
+        <artifactId>xksms-services</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>xksms-system</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+    <name>${project.artifactId}</name>
+    <description>系统管理中心父模块 (租户、角色、权限)</description>
+
+    <modules>
+        <module>xksms-system-api</module>
+        <module>xksms-system-biz</module>
+    </modules>
+</project>

@@ -24,8 +24,7 @@
 
         <dependency>
             <groupId>com.xksms</groupId>
-            <artifactId>xksms-common</artifactId>
-            <version>${revision}</version>
+            <artifactId>xksms-common-core</artifactId>
         </dependency>
 
         <dependency>
