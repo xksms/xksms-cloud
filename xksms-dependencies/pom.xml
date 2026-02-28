@@ -170,13 +170,7 @@
 
             <!-- ==================== 内部模块 BOM ==================== -->
             <!-- 统一管理内部模块版本，避免硬编码 -->
-            <dependency>
-                <groupId>com.xksms</groupId>
-                <artifactId>xksms-common</artifactId>
-                <version>${revision}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+            <!-- 注意：xksms-common 是聚合模块，不需要在此导入 -->
             <dependency>
                 <groupId>com.xksms</groupId>
                 <artifactId>xksms-common-core</artifactId>
@@ -194,7 +188,27 @@
             </dependency>
             <dependency>
                 <groupId>com.xksms</groupId>
+                <artifactId>xksms-user-biz</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
                 <artifactId>xksms-system-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-system-biz</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-notify-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xksms</groupId>
+                <artifactId>xksms-notify-biz</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -243,7 +257,15 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- MyBatis Plus -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.5.6</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
+
 
 </project>

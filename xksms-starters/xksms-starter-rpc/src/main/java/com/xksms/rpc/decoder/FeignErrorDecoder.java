@@ -67,7 +67,7 @@ public record FeignErrorDecoder(ObjectMapper objectMapper) implements ErrorDecod
                 try {
                     Result<?> result = objectMapper.readValue(body, Result.class);
                     if (result.code() != 0 && result.message() != null) {
-                        clientErrorMsg = String.format("远程调用 [%s] 失败，Code: %d, Message: %s",
+                        final String finalMsg = String.format("远程调用 [%s] 失败，Code: %d, Message: %s",
                                 methodKey, result.code(), result.message());
                         return new BaseException(new IErrorCode() {
                             @Override
@@ -77,7 +77,7 @@ public record FeignErrorDecoder(ObjectMapper objectMapper) implements ErrorDecod
 
                             @Override
                             public String getMessage() {
-                                return clientErrorMsg;
+                                return finalMsg;
                             }
                         });
                     }
@@ -86,6 +86,7 @@ public record FeignErrorDecoder(ObjectMapper objectMapper) implements ErrorDecod
                     log.debug("解析错误响应体失败：{}", body);
                 }
             }
+            final String finalClientErrorMsg = clientErrorMsg;
             log.warn(clientErrorMsg);
             return new BaseException(new IErrorCode() {
                 @Override
@@ -95,7 +96,7 @@ public record FeignErrorDecoder(ObjectMapper objectMapper) implements ErrorDecod
 
                 @Override
                 public String getMessage() {
-                    return clientErrorMsg;
+                    return finalClientErrorMsg;
                 }
             });
         }
@@ -144,7 +145,7 @@ public record FeignErrorDecoder(ObjectMapper objectMapper) implements ErrorDecod
             }
             return new String(response.body().asInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            log.error("解析响应体失败，methodKey: {}", methodKey, e);
+            log.error("解析响应体失败", e);
             return null;
         }
     }

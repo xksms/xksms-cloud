@@ -421,7 +421,7 @@
       <workItem from="1760422301919" duration="4307000" />
       <workItem from="1764120335544" duration="991000" />
       <workItem from="1770773504342" duration="165000" />
-      <workItem from="1772262626525" duration="5950000" />
+      <workItem from="1772262626525" duration="6824000" />
     </task>
     <task id="LOCAL-00001" summary="feat(starters): 新增日志和安全模块的自动配置&#10;&#10;- 新增 xksms-starter-log 和 xksms-starter-security模块&#10;- 实现了日志和安全相关的自动配置&#10;- 添加了 JWT 认证和日志用户信息注入的功能&#10;-优化了项目结构，提高了模块的可复用性和可维护性">
       <option name="closed" value="true" />
