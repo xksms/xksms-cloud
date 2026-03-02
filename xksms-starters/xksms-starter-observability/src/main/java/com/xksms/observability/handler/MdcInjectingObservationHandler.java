@@ -2,48 +2,60 @@ package com.xksms.observability.handler;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
-import io.micrometer.tracing.TraceContext;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import org.slf4j.MDC;
-import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.stereotype.Component;
 
 /**
- * 一个自定义的 ObservationHandler，核心职责是在观测（Observation）开始时，
- * 将链路追踪的 traceId 和 spanId 注入到 SLF4J 的 MDC (Mapped Diagnostic Context) 中，
- * 并在观测结束时将其清理。
- * <p>
- * 这使得我们的日志（如 logback）可以通过 %X{traceId} 的方式，自动打印出当前请求的链路ID。
+ * 链路追踪 MDC 注入处理器
+ *
+ * 工作原理：
+ * 1. Spring Boot 3.2+ Micrometer Tracing 会自动将 traceId 注入到 Reactor Context
+ * 2. 通过 logback 的 MDC 过滤器，自动从 Reactor Context 读取 traceId
+ * 3. 无需手动处理，Spring 已经自动桥接
+ *
+ * 此 Handler 用于确保在 Observation 启动时正确设置 MDC
  */
+@Component
+@ConditionalOnClass({ObservationRegistry.class, Tracer.class})
 public class MdcInjectingObservationHandler implements ObservationHandler<Observation.Context> {
 
-	private static final String TRACE_ID_KEY = "traceId";
-	private static final String SPAN_ID_KEY = "spanId";
+    private static final String TRACE_ID_KEY = "traceId";
+    private static final String SPAN_ID_KEY = "spanId";
 
-	@Override
-	public void onStart(Observation.Context context) {
-		// 尝试从上下文中获取 TracingContext
-		TraceContext traceContext = context.get(TraceContext.class);
-		if (traceContext != null) {
-			// 如果存在，将其 traceId 和 spanId 放入 MDC
-			if (StringUtils.hasText(traceContext.traceId())) {
-				MDC.put(TRACE_ID_KEY, traceContext.traceId());
-			}
-			if (StringUtils.hasText(traceContext.spanId())) {
-				MDC.put(SPAN_ID_KEY, traceContext.spanId());
-			}
-		}
-	}
+    private final Tracer tracer;
 
-	@Override
-	public void onStop(@NonNull Observation.Context context) {
-		// 观测结束时，无论成功还是失败，都从 MDC 中移除相关键
-		MDC.remove(TRACE_ID_KEY);
-		MDC.remove(SPAN_ID_KEY);
-	}
+    public MdcInjectingObservationHandler(Tracer tracer) {
+        this.tracer = tracer;
+    }
 
-	@Override
-	public boolean supportsContext(@NonNull Observation.Context context) {
-		// 我们希望这个 Handler 对所有类型的观测都生效
-		return true;
-	}
+    @Override
+    public void onStart(Observation.Context context) {
+        // 从当前 span 获取 traceId 和 spanId
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+
+            // 注入 MDC (对 MVC 有效)
+            MDC.put(TRACE_ID_KEY, traceId);
+            MDC.put(SPAN_ID_KEY, spanId);
+        }
+    }
+
+    @Override
+    public void onStop(Observation.Context context) {
+        // 清理 MDC
+        MDC.remove(TRACE_ID_KEY);
+        MDC.remove(SPAN_ID_KEY);
+    }
+
+    @Override
+    public boolean supportsContext(Observation.Context context) {
+        // 仅处理有 Span 的场景
+        return context.getContextualName() != null;
+    }
 }
